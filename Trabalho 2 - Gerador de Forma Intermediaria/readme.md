@@ -11,37 +11,143 @@
 
 ## Definindo as Ações Semânticas
 
+versao 1
+
 ```
+A   ->  id { Print( id ); } = FN { Print( "=" ); }
 
-A -> id { Print( id ); } = FN { Print( "="); }
-
+// Funcoes Pre-fixadas
 FN  ->  funcao E1 { Print( funcao ) }
+    |   E1
 
 // Expressao
-E1  ->  EU + E2 { Print( "+" ); }
-    |   EU - E2 { Print( "-" ); }
-    |   E2
+E1  ->  EU E2
 
-E2  ->  EU + E2 { Print( "+" ); }
-    |   EU - E2 { Print( "-" ); }
-    |   EU
+E2  ->  + EU { Print( "+" ); } E2
+    |   - EU { Print( "-" ); } E2
 
 // Operadores Unários
-EU ->   + E2
-    |   - E2
-    |   T2
+EU ->   + EU 
+    |   - { Print( "0" ); } EU { Print( "-" ); }
+    |   T1
 
-T   ->  T * F { Print( "*" ); }
-    |   T / F { Print( "/" ); }
-    |   F
+T1  ->  F T2
 
-F   ->  id { Print(id + "@"); } FN2
-    |   num { Print( num ); } FN2
-    |   ( E ) FN2
+T2  ->  * F { Print( "*" ); } T2
+    |   / F { Print( "/" ); } T2
 
+F   ->  id { Print( id + "@" ); } FN2
+    |   int { Print( int ); } FN2
+    |   float { Print( float ); } FN2
+    |   string { Print( string ); } FN2
+    |   ( P FN2
+
+P   ->  ,
+    |   )
+    |   FN
+
+// Funcoes Pos-fixadas
 FN2 ->  ! { Print( "fat" ) }
+    |   ε
 
 ```
+
+versao 2
+
+```
+A   ->  id { Print( id ); } = FN ; { Print( "="); }
+    |   FN ;
+
+// Funcoes Pre-fixadas
+FN  ->  funcao E1 { Print( funcao ) }
+    |   E1
+
+E1  ->  T1 E2
+
+E2  ->  + T1 { Print( "+" ); } E2
+    |   - T1 { Print( "-" ); } E2
+
+T1  ->  PT T2
+
+T2  ->  * PT1 { Print( "*" ); } T2
+    |   / PT1 { Print( "/" ); } T2
+
+// Exponenciacao
+PT1 ->  U PT2
+
+PT2 ->  ^ U { Print( "^" ); } PT2
+    |   ε
+
+// Operadores Unários
+U   ->  + U 
+    |   - { Print( "0" ); } U { Print( "-" ); }
+    |   F
+
+F   ->  id { Print( id + "@" ); } FN2
+    |   int { Print( int ); } FN2
+    |   float { Print( float ); } FN2
+    |   string { Print( string ); } FN2
+    |   ( P FN2
+
+P   ->  ,
+    |   )
+    |   FN
+
+// Funcoes Pos-fixadas
+FN2 ->  ! { Print( "fat" ) }
+    |   ε
+
+```
+
+versao 3
+precedencia do ^ maior que do unario
+
+```
+A   ->  id { Print( id ); } = FN ; { Print( "="); }
+    |   FN ;
+
+// Funcoes Pre-fixadas
+FN  ->  funcao E1 { Print( funcao ) }
+    |   E1
+
+E1  ->  T1 E2
+
+E2  ->  + T1 { Print( "+" ); } E2
+    |   - T1 { Print( "-" ); } E2
+
+T1  ->  U T2
+
+T2  ->  * U { Print( "*" ); } T2
+    |   / U { Print( "/" ); } T2
+
+// Operadores Unários
+U   ->  + U 
+    |   - { Print( "0" ); } U { Print( "-" ); }
+    |   PT1
+
+// Exponenciacao
+PT1 ->  F PT2
+
+PT2 ->  ^ F { Print( "^" ); } PT2
+    |   ε
+
+F   ->  id { Print( id + "@" ); } FN2
+    |   int { Print( int ); } FN2
+    |   float { Print( float ); } FN2
+    |   string { Print( string ); } FN2
+    |   ( P FN2
+
+P   ->  ,
+    |   )
+    |   FN
+
+// Funcoes Pos-fixadas
+FN2 ->  ! { Print( "fat" ) }
+    |   ε
+
+```
+
+antigo
 
 ```
 A -> id { Print( id ); } = E1 ; { Print( "=" ); }

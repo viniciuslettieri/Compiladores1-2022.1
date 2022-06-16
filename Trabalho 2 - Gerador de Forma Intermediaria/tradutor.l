@@ -13,7 +13,7 @@ using namespace std;
 int token;
 int linha = 1, coluna_atual = 1, coluna_anterior = 0;
 
-enum TOKEN { _ID = 256, _INT, _FLOAT, _STRING, _STRING2, _FUNCAO};  
+enum TOKEN { _ID = 256, _INT, _FLOAT, _STRING, _STRING2, _FUNCAO, _FUNCAO_POS};  
 
 // Tratamento de variaveis
 map<string, double> var;
@@ -24,19 +24,10 @@ map<int,string> nome_tokens = {
     { _STRING, "string" },
     { _FLOAT, "float" },
     { _ID, "nome de identificador" },
-    { _FUNCAO, "funcao" }
+    { _FUNCAO, "funcao" },
+    { _FUNCAO_POS, "funcao pos fixada" }
 };
 
-// Declaracao dos Estados
-void A( );
-void E1( );
-void E2( );
-void T1( );
-void T2( );
-void T3( );
-void F1( );
-void F2( );
-void P( );
 void casa( int esperado );
 int tk( int token );
 
@@ -60,6 +51,8 @@ STRING_ACENTO           `[^`]*`
 
 "print"                 { return tk(_FUNCAO); }
 "max"                   { return tk(_FUNCAO); }
+"dtos"                  { return tk(_FUNCAO); }
+"!"                     { return tk(_FUNCAO_POS); }
 
 " "	                    { coluna_anterior = coluna_atual++; }
 "\t"		            { coluna_anterior = coluna_atual; coluna_atual += 2; }
@@ -112,163 +105,219 @@ void casa( int esperado ) {
 
 
 bool logging = false;
+string offset = "";
 
 
-// CMDs -> A CMDs | e             [funciona como loop]
+// Declaracao dos Estados
+void A( );
+void FN( );
+void E1( );
+void E2( );
+void T1( );
+void T2( );
+void PT1( );
+void PT2( );
+void U( );
+void F( );
+void P( );
+void FN2( );
 
+
+// CMDs   ->  A CMDs | e             [funciona como loop]
 void CMDs(){
     A();
-    cout << endl;
+    // cout << endl;
     if( token != 0 )
         CMDs();
 }
 
-// A -> id { Print( id ); } = E1 ; { Print( "=" ); }
-//    | print E1 ; { Print( "print #" ); }
-
+// A   ->  id { Print( id ); } = FN { Print( "="); }
+//      |   FN
 void A( ) {
-    if(logging) cout << "[+A]" << endl;
+    if(logging) cout << endl << offset << "[+A]" << endl;
+    offset += ">";
+
     string temp = yytext; 
     switch( token ) {
         case _ID:
             casa( _ID );
             cout << temp << " ";
             casa( '=' );
-            E1();
+            FN();
             casa( ';' );
             cout << '=' << " ";
             break;
         
-        case _FUNCAO:
-            casa( _FUNCAO );
-            E1();
-            casa( ';' );
-            cout << temp << " # ";
-            break;
-    }
-    if(logging) cout << "[-A]" << endl;
-}
-
-// E1 -> T1 E2
-//    | max E1 ; { Print( "max #" ); }
-
-void E1( ) {
-    if(logging) cout << "[+E1]" << endl;
-    string temp = yytext; 
-    switch( token ) {
-        case _FUNCAO:
-            casa( _FUNCAO );
-            E1();
-            cout << temp << " # ";
-            break; 
-
         default:
-            T1();
-            E2();
+            FN();
+            casa( ';' );
             break;
     }
-    if(logging) cout << "[-E1]" << endl;
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-A]" << endl;
 }
 
-// E2 -> + T1 { Print( "+" ) E1; }
-//    | - T1 { Print( "-" ) E1; }
-//    | ^ T1 { Print( "^" ) E1; }
-//    | ε
+// FN  ->  funcao E1 { Print( funcao ) }
+//      |  E1
+void FN( ) {
+    if(logging) cout << endl << offset << "[+FN]" << endl;
+    offset += ">";
+    
+    string temp = yytext; 
+    switch( token ) {        
+        case _FUNCAO:
+            casa( _FUNCAO );
+            E1();
+            cout << temp << " # ";
+            break;
+        
+        default:
+            E1();
+    }
 
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-FN]" << endl;
+}
+
+// E1  ->  T1 E2
+void E1( ) {
+    if(logging) cout << endl << offset << "[+E1]" << endl;
+    offset += ">";
+
+    T1( );
+    E2( );
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-E1]" << endl;
+}
+
+// E2  ->  + T1 { Print( "+" ); } E2
+//     |   - T1 { Print( "-" ); } E2
 void E2( ) {
-    if(logging) cout << "[+E2]" << endl;
+    if(logging) cout << endl << offset << "[+E2]" << endl;
+    offset += ">";
+    
+    string temp = yytext; 
     switch( token ) {
         case '+':
             casa( '+' );
             T1();
-            cout << "+" << " ";
+            cout << "+ ";
             E2();
             break;
 
         case '-':
             casa( '-' );
             T1();
-            cout << "-" << " ";
+            cout << "- ";
             E2();
             break;
     }
-    if(logging) cout << "[-E2]" << endl;
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-E2]" << endl;
 }
 
-// T1 -> F T2
-
+// T1  ->  U T2
 void T1( ) {
-    if(logging) cout << "[+T1]" << endl;
-    F1();
-    T2();
-    if(logging) cout << "[-T1]" << endl;
+    if(logging) cout << endl << offset << "[+T1]" << endl;
+    offset += ">";
+
+    U( );
+    T2( );
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-T1]" << endl;
 }
 
-// T2 -> * F1 { Print( "*" ); }
-//    | / F1 { Print( "/" ); }
-//    | T3
-
+// T2  ->  * U { Print( "*" ); } T2
+//     |   / U { Print( "/" ); } T2
 void T2( ) {
-    if(logging) cout << "[+T2]" << endl;
+    if(logging) cout << endl << offset << "[+T2]" << endl;
+    offset += ">";
+    
+    string temp = yytext; 
     switch( token ) {
         case '*':
             casa( '*' );
-            F1();
-            cout << "*" << " ";
+            U();
+            cout << "* ";
             T2();
             break;
 
         case '/':
             casa( '/' );
-            F1();
-            cout << "/" << " ";
+            U();
+            cout << "/ ";
             T2();
             break;
-        
-        default:
-            T3();
-            break;
-    }    
-    if(logging) cout << "[-T2]" << endl;
+    }
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-E2]" << endl;
 }
 
-void T3( ) {
-    if(logging) cout << "[+T2]" << endl;
+// U   ->  + U 
+//     |   - { Print( "0" ); } U { Print( "-" ); }
+//     |   PT1
+void U( ) {
+    if(logging) cout << endl << offset << "[+U]" << endl;
+    offset += ">";
+    
+    string temp = yytext; 
     switch( token ) {
-        case '^':
-            casa( '^' );
-            F1();
-            cout << "^" << " ";
-            T2();
-            break;
-    }    
-    if(logging) cout << "[-T2]" << endl;
-}
-
-// F1 -> + { Print( "0" ); } F2 { Print( "+" ); }; 
-//    | - { Print( "0" ); } F2 { Print( "-" ); }; 
-//    | F2
-
-void F1( ) {
-    switch( token ){
         case '+':
             casa( '+' );
-            cout << "0 ";
-            F2();    
-            cout << "+ ";
+            U();
             break;
 
         case '-':
             casa( '-' );
             cout << "0 ";
-            F2();    
+            U();
             cout << "- ";
-            break; 
-
+            break;
+        
         default:
-            F2();
+            PT1();
             break;
     }
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-U]" << endl;
+}
+
+// PT1 ->  F PT2
+void PT1( ) {
+    if(logging) cout << endl << offset << "[+PT1]" << endl;
+    offset += ">";
+
+    F( );
+    PT2( );
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-PT1]" << endl;
+}
+
+// PT2 ->  ^ F { Print( "^" ); } PT2
+//     |   ε
+void PT2( ) {
+    if(logging) cout << endl << offset << "[+PT2]" << endl;
+    offset += ">";
+    
+    string temp = yytext; 
+    switch( token ) {
+        case '^':
+            casa( '^' );
+            F();
+            PT2();
+            cout << "^ ";
+            break;
+    }
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-PT2]" << endl;
 }
 
 // F -> id { Print( id + "@" ); }
@@ -277,8 +326,10 @@ void F1( ) {
 //    | string { Print( string ); }
 //    | ( E1 )
 
-void F2( ) {
-    if(logging) cout << "[+F1]" << endl;
+void F( ) {
+    if(logging) cout << endl << offset << "[+F]" << endl;
+    offset += ">";
+
     string temp = yytext;
     switch( token ) {
         case _ID: 
@@ -315,18 +366,17 @@ void F2( ) {
             erro( string("Operando esperado, encontrado ") + yytext );
     }
 
-    if( token == '!' ){
-        casa( '!' );
-        cout << "fat # ";
-    }
+    FN2( );
 
-    if(logging) cout << "[-F1]" << endl;
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-F]" << endl;
 }
 
-// P -> ',' | ')' | E1
-
+// P -> ',' | ')' | FN
 void P( ) {
-    if(logging) cout << "[+P]" << endl;
+    if(logging) cout << endl << offset << "[+P]" << endl;
+    offset += ">";
+
     string temp = yytext;
     switch( token ) {
         case ',': 
@@ -339,13 +389,34 @@ void P( ) {
             break;
 
         default:
-            E1();
+            FN();
             P();
             break;
     }
-    if(logging) cout << "[-P]" << endl;
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-P]" << endl;
 }
 
+// FN2 ->  ! { Print( "fat #" ) }
+//     |   ε
+void FN2( ) {
+    if(logging) cout << endl << offset << "[+FN2]" << endl;
+    offset += ">";
+
+    string temp = yytext;
+    switch( token ) {
+        case _FUNCAO_POS: 
+            if( temp == "!" ){
+                casa( _FUNCAO_POS ); 
+                cout << "fat # ";
+            }
+            break;
+    }
+
+    offset.pop_back();
+    if(logging) cout << endl << offset << "[-FN2]" << endl;
+}
 
 auto f = &yyunput;
 
