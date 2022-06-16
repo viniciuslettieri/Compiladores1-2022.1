@@ -1913,7 +1913,7 @@ string offset = "";
 
 // Declaracao dos Estados
 void A( );
-void FN( );
+// void FN( );
 void E1( );
 void E2( );
 void T1( );
@@ -1946,13 +1946,13 @@ void A( ) {
             casa( _ID );
             cout << temp << " ";
             casa( '=' );
-            FN();
+            E1();
             casa( ';' );
             cout << '=' << " ";
             break;
         
         default:
-            FN();
+            E1();
             casa( ';' );
             break;
     }
@@ -1963,33 +1963,22 @@ void A( ) {
 
 // FN  ->  funcao E1 { Print( funcao ) }
 //      |  E1
-void FN( ) {
-    if(logging) cout << endl << offset << "[+FN]" << endl;
-    offset += ">";
-    
-    string temp = yytext; 
-    switch( token ) {        
-        case _FUNCAO:
-            casa( _FUNCAO );
-            E1();
-            cout << temp << " # ";
-            break;
-        
-        default:
-            E1();
-    }
-
-    offset.pop_back();
-    if(logging) cout << endl << offset << "[-FN]" << endl;
-}
-
-// E1  ->  T1 E2
 void E1( ) {
     if(logging) cout << endl << offset << "[+E1]" << endl;
     offset += ">";
-
-    T1( );
-    E2( );
+    
+    // string temp = yytext; 
+    // switch( token ) {        
+    //     case _FUNCAO:
+    //         casa( _FUNCAO );
+    //         E1();
+    //         cout << temp << " # ";
+    //         break;
+        
+    //     default:
+            T1( );
+            E2( );
+    // }
 
     offset.pop_back();
     if(logging) cout << endl << offset << "[-E1]" << endl;
@@ -2135,6 +2124,12 @@ void F( ) {
 
     string temp = yytext;
     switch( token ) {
+        case _FUNCAO: 
+            casa( _FUNCAO ); 
+            E1();
+            cout << temp << " #" << " "; 
+            break;
+
         case _ID: 
             casa( _ID ); 
             cout << temp << " @" << " "; 
@@ -2192,7 +2187,7 @@ void P( ) {
             break;
 
         default:
-            FN();
+            E1();
             P();
             break;
     }
