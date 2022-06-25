@@ -33,6 +33,9 @@ WS	                    [ \t\n]
 "=="                    { return retorna(IG); }
 "<>"	                { return retorna(DIF); }  
 
+"{}"                    { return retorna(NEWOBJECT); }
+"[]"                    { return retorna(NEWARRAY); }
+
 {COMENTARIO_BLOCO}      { return retorna(COMENTARIO); }
 {COMENTARIO_LINHA}      { return retorna(COMENTARIO); }
 {STRING_SIMPLES}        { return retorna(STRING); }

@@ -26,41 +26,84 @@ int coluna = 1;
 
 %}
 
-%token PRINT ID NUM MAIG MEIG IG DIF STRING COMENTARIO LET CONST VAR IF WHILE FOR
+%token PRINT ID NUM MAIG MEIG IG DIF STRING COMENTARIO LET CONST VAR IF WHILE FOR NEWOBJECT NEWARRAY
+
+
+
+%start S
 
 %%
 
-P : A ';' P
-  | A ';'
-  ;
+S           : CMDs { Print($1.v); }
+            ;
 
-A : LET ID '=' E 
-  | CONST ID 
-  | VAR ID 
-  | PRINT E 
-  ;
-  
-E : E '+' E { Print( "+" ); }
-  | E '-' E { Print( "-" ); }
-  | E '*' E { Print( "*" ); }
-  | E '/' E { Print( "/" ); }
-  | F
-  ;
-  
-F : ID { Print( $1.v + " @" ); }
-  | NUM { Print(  $1.v ); }
-  | STRING { Print(  $1.v ); }
-  | '(' E ')'
-  | ID '(' PARAM ')' { Print( $1.v + " #" ); }
-  ;
-  
-PARAM : ARGs
-      |
-      ;
-  
-ARGs : E ',' ARGs
-     | E
-     ;
+CMDs        : CMD CMDs
+            |
+            ;
+
+// CMD         : CMD_FOR ';'
+//             // | CMD_IF ';'
+//             | EXPR ';'
+//             ;
+CMD         : EXPR ';'
+            | BLOCO
+            ;
+
+// CMD_FOR     : FOR '(' CMD_DECL ';' EXPR ';' ATRIB ')' CMD
+//             | FOR '(' ATRIB ';' EXPR ';' ATRIB ')' CMD
+//             | FOR '(' EXPR ';' EXPR ';' ATRIB ')' CMD
+//             ;
+
+LVALUE      : ID    
+            ;
+
+EXPR        : ATRIB
+            | CMD_DECL
+            | EXPR MEIG EXPR
+            | EXPR MAIG EXPR
+            | EXPR IG EXPR
+            | EXPR DIF EXPR
+            | EXPR '^' EXPR
+            | EXPR '<' EXPR
+            | EXPR '*' EXPR
+            | EXPR '+' EXPR
+            | EXPR '-' EXPR
+            | EXPR '/' EXPR
+            | EXPR '>' EXPR
+            | EXPR '%' EXPR
+            | FINAL
+            ;
+
+CMD_DECL    : LET MULTI_DECL
+            | VAR MULTI_DECL
+            | CONST MULTI_DECL
+            ;
+
+MULTI_DECL  : ATRIB ',' MULTI_DECL
+            | ATRIB
+            | ID ',' MULTI_DECL
+            | ID
+            ;
+
+ATRIB       : LVALUE '=' EXPR
+            // | LVALUEPROP '=' EXPR
+            ;
+
+FINAL       : NUM
+            | STRING
+            | NEWOBJECT
+            | NEWARRAY
+            | '(' EXPR ')'
+            | ID '(' ')'
+            | ID '(' EXPRS ')'
+            ; 
+
+EXPRS       : EXPR ',' EXPRS
+            | EXPR 
+            ;
+
+BLOCO       : '{' CMDs '}'
+            ;
   
 %%
 
