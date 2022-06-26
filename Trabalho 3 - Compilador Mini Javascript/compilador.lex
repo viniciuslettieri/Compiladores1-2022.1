@@ -14,7 +14,7 @@ WS	                    [ \t\n]
 
 "\t"                    { coluna += 4; }
 " "                     { coluna++; }
-"\n"	                { linha++; coluna = 1; }
+"\n"	                { linha++; coluna = 1; return retorna(NEWLINE); }
 
 {NUM}	                { return retorna(NUM); }
 

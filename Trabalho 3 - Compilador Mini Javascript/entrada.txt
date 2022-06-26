@@ -1,5 +1,2 @@
-let a = {};
-let b = [];
-let c, d;
-c = 1;
-d = 'Hello';
+let a = {}, b = [], c = 9
+let __9 = 1.1; let _ = "abc"

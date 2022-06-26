@@ -788,7 +788,7 @@ case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
 #line 17 "compilador.lex"
-{ linha++; coluna = 1; }
+{ linha++; coluna = 1; return retorna(NEWLINE); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
