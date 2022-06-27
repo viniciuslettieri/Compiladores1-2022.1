@@ -14,7 +14,8 @@ WS	                    [ \t\n]
 
 "\t"                    { coluna += 4; }
 " "                     { coluna++; }
-"\n"	                { linha++; coluna = 1; return retorna(NEWLINE); }
+"\n"	                { linha++; coluna = 1; 
+                          return retorna(NEWLINE); }
 
 {NUM}	                { return retorna(NUM); }
 
@@ -32,6 +33,8 @@ WS	                    [ \t\n]
 "<="	                { return retorna(MEIG); }  
 "=="                    { return retorna(IG); }
 "<>"	                { return retorna(DIF); }  
+"+="                    { return retorna(MAATR); }  
+"-="                    { return retorna(MEATR); }  
 
 "{}"                    { return retorna(NEWOBJECT); }
 "[]"                    { return retorna(NEWARRAY); }

@@ -27,9 +27,9 @@ int coluna = 1;
 
 %}
 
-%token PRINT ID NUM MAIG MEIG IG DIF STRING COMENTARIO LET CONST VAR IF WHILE FOR NEWOBJECT NEWARRAY NEWLINE
+%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR STRING COMENTARIO LET CONST VAR IF WHILE FOR NEWOBJECT NEWARRAY NEWLINE
 
-%right '=' ','
+%right '=' ',' MAATR MEATR
 %nonassoc '<' '>' IG MEIG MAIG DIF
 %left '+' '-'
 %left '*' '/' '%'
@@ -55,6 +55,7 @@ CMD         : EXPR ';'                      { $$.v = logging("b",  $1.v + "\n");
             | EXPR NEWLINE                  { $$.v = logging("b",  $1.v + "\n"); }
             | BLOCO                         { $$.v = logging("c",  $1.v); }
             | EXPR                          { $$.v = logging("b",  $1.v + "\n"); }
+            | NEWLINE                       { $$.v = logging("a0", ""); }
             ;
 
 // CMD_FOR     : FOR '(' CMD_DECL ';' EXPR ';' ATRIB ')' CMD
@@ -65,7 +66,8 @@ CMD         : EXPR ';'                      { $$.v = logging("b",  $1.v + "\n");
 LVALUE      : ID                            { $$.v = logging("d",  $1.v + " "); }
             ;
 
-LVALUEPROP  : FINALID                       { $$.v = logging("d",  $1.v + " "); }
+LVALUEPROP  : EXPR '.' ID                   { $$.v = logging("p",  $1.v + $3.v + " "); }
+            | EXPR '[' EXPR ']'             { $$.v = logging("p",  $1.v + $3.v + " "); } 
             ;
 
 EXPR        : ATRIB                         { $$.v = logging("e",  $1.v); }
@@ -82,6 +84,8 @@ EXPR        : ATRIB                         { $$.v = logging("e",  $1.v); }
             | EXPR '-' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " - "); }
             | EXPR '/' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " / "); }
             | EXPR '%' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " % "); }
+            | '+' EXPR                      { $$.v = logging("g",  $2.v); }
+            | '-' EXPR                      { $$.v = logging("g",  " 0 " + $2.v + " - "); }
             | FINAL                         { $$.v = logging("g1",  $1.v); }
             ;
 
@@ -97,7 +101,9 @@ MULTI_DECL  : LVALUE '=' EXPR ',' MULTI_DECL    { $$.v = logging("i",  $1.v + " 
             ;
 
 ATRIB       : LVALUE '=' EXPR               { $$.v = logging("m",  $1.v + $3.v + " = " + " ^ "); }
+            | LVALUE MAATR EXPR             { $$.v = logging("m",  $1.v + $1.v + " @ " + $3.v + " + = " + " ^ "); }
             | LVALUEPROP '=' EXPR           { $$.v = logging("m",  $1.v + $3.v + " [=] " + " ^ "); }
+            | LVALUEPROP MEATR EXPR         { $$.v = logging("m",  $1.v + $1.v + " [@] " + $3.v + " + [=] " + " ^ "); }
             ;
 
 FINAL       : NUM                           { $$.v = logging("n",  $1.v + " "); }
@@ -106,7 +112,8 @@ FINAL       : NUM                           { $$.v = logging("n",  $1.v + " "); 
             | NEWARRAY                      { $$.v = logging("n",  string("[]") + " "); }
             | '(' EXPR ')'                  { $$.v = logging("n",  $2.v + " "); }
             // | FUNCAO
-            | FINALID                       { $$.v = logging("n",  $1.v + " "); }
+            | LVALUE                        { $$.v = logging("n10",  $1.v + " @ "); }
+            | LVALUEPROP                    { $$.v = logging("n11",  $1.v + " [@] "); }
             ; 
 
             // | ID '(' ')'
@@ -115,13 +122,6 @@ FINAL       : NUM                           { $$.v = logging("n",  $1.v + " "); 
 //             | EXPR 
 //             ;
 
-FINALID     : ID FINALIDPROP                { $$.v = logging("o",  $1.v + " @ " + $2.v); }
-            ;
-
-FINALIDPROP : '.' ID FINALIDPROP            { $$.v = logging("p",  $2.v + " [@] " + $3.v); }
-            | '[' EXPR ']' FINALIDPROP      { $$.v = logging("p",  $2.v + " [@] " + $4.v); } 
-            |                               { $$.v = logging("q", ""); }
-            ;
 
 BLOCO       : '{' CMDs '}'                  { $$.v = logging("q",  $1.v); }
             ;
