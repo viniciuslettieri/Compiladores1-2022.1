@@ -3,20 +3,25 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 
 using namespace std;
 
 struct Atributos {
-    string v;
+    vector<string> v;
 };
 
 #define YYSTYPE Atributos
 
 void erro( string msg );
-void Print( string st );
+void Print( vector<string> st );
 int retorna( int tk );
 string nome_token( int token );
-string logging( string id, string s );
+
+vector<string> concatena( vector<string> a, vector<string> b );
+vector<string> operator+( vector<string> a, vector<string> b );
+vector<string> operator+( vector<string> a, string b );
+vector<string> operator+( string a, vector<string> b );
 
 extern "C" int yylex();
 int yyparse();
@@ -27,10 +32,11 @@ int coluna = 1;
 
 %}
 
-%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR STRING COMENTARIO LET CONST VAR IF WHILE FOR NEWOBJECT NEWARRAY NEWLINE
+%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR STRING COMENTARIO LET CONST VAR IF WHILE FOR NEWOBJECT NEWARRAY
 
-%right '=' ',' MAATR MEATR
-%nonassoc '<' '>' IG MEIG MAIG DIF
+%right '=' MAATR MEATR 
+%nonassoc '<' '>' IG MEIG MAIG DIF '[' 
+%left '.'
 %left '+' '-'
 %left '*' '/' '%'
 %right '^'
@@ -39,92 +45,92 @@ int coluna = 1;
 
 %%
 
-S           : CMDs                          { Print($1.v + '.'); }
+S           : CMDs                          { Print($1.v + "."); }
             ;
 
-CMDs        : CMD CMDs                      { $$.v = logging("a", $1.v + $2.v); }
-            |                               { $$.v = logging("a0", ""); }
+CMDs        : CMD CMDs                      { $$.v =  $1.v + "\n" + $2.v; }
+            |                               { $$.v = {}; }
             ;
 
 // CMD         : CMD_FOR ';'
-//             // | CMD_IF ';'
-//             | EXPR ';'
+//             | RVALUE ';'
 //             ;
-CMD         : EXPR ';'                      { $$.v = logging("b",  $1.v + "\n"); }
-            | EXPR ';' NEWLINE              { $$.v = logging("b",  $1.v + "\n"); }
-            | EXPR NEWLINE                  { $$.v = logging("b",  $1.v + "\n"); }
-            | BLOCO                         { $$.v = logging("c",  $1.v); }
-            | EXPR                          { $$.v = logging("b",  $1.v + "\n"); }
-            | NEWLINE                       { $$.v = logging("a0", ""); }
+CMD         : RVALUE ';'                    { $$.v =  $1.v + "^"; }
+            | CMD_DECL ';'                  { $$.v =  $1.v; }
+            // | CMD_IF ';'                    { $$.v =  $1.v + "\n"; }
+            // | BLOCO                         { $$.v =  $1.v; }
+            // | RVALUE                          { $$.v =  $1.v + "\n"; }
             ;
 
-// CMD_FOR     : FOR '(' CMD_DECL ';' EXPR ';' ATRIB ')' CMD
-//             | FOR '(' ATRIB ';' EXPR ';' ATRIB ')' CMD
-//             | FOR '(' EXPR ';' EXPR ';' ATRIB ')' CMD
+// CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD
+//             | FOR '(' ATRIB ';' RVALUE ';' ATRIB ')' CMD
+//             | FOR '(' RVALUE ';' RVALUE ';' ATRIB ')' CMD
 //             ;
 
-LVALUE      : ID                            { $$.v = logging("d",  $1.v + " "); }
+// CMD_IF      : IF '(' RVALUE ')' CMD           { $$.v = $; }
+//             ;
+
+LVALUE      : ID                            { $$.v =  $1.v; }
             ;
 
-LVALUEPROP  : EXPR '.' ID                   { $$.v = logging("p",  $1.v + $3.v + " "); }
-            | EXPR '[' EXPR ']'             { $$.v = logging("p",  $1.v + $3.v + " "); } 
+LVALUEPROP  : RVALUE '.' ID                 { $$.v =  $1.v + $3.v; }
+            | RVALUE '[' RVALUE ']'         { $$.v =  $1.v + $3.v; } 
             ;
 
-EXPR        : ATRIB                         { $$.v = logging("e",  $1.v); }
-            | CMD_DECL                      { $$.v = logging("f",  $1.v); }
-            | EXPR MEIG EXPR                { $$.v = logging("g",  $1.v + $3.v + " <= "); }
-            | EXPR MAIG EXPR                { $$.v = logging("g",  $1.v + $3.v + " >= "); }
-            | EXPR IG EXPR                  { $$.v = logging("g",  $1.v + $3.v + " == "); }
-            | EXPR DIF EXPR                 { $$.v = logging("g",  $1.v + $3.v + " != "); }
-            | EXPR '^' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " ^ "); }
-            | EXPR '<' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " < "); }
-            | EXPR '>' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " > "); }
-            | EXPR '*' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " * "); }
-            | EXPR '+' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " + "); }
-            | EXPR '-' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " - "); }
-            | EXPR '/' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " / "); }
-            | EXPR '%' EXPR                 { $$.v = logging("g",  $1.v + $3.v + " % "); }
-            | '+' EXPR                      { $$.v = logging("g",  $2.v); }
-            | '-' EXPR                      { $$.v = logging("g",  " 0 " + $2.v + " - "); }
-            | FINAL                         { $$.v = logging("g1",  $1.v); }
+RVALUE      : ATRIB                         { $$.v =  $1.v; }
+            | RVALUE MEIG RVALUE            { $$.v =  $1.v + $3.v + "<="; }
+            | RVALUE MAIG RVALUE            { $$.v =  $1.v + $3.v + ">="; }
+            | RVALUE IG RVALUE              { $$.v =  $1.v + $3.v + "=="; }
+            | RVALUE DIF RVALUE             { $$.v =  $1.v + $3.v + "!="; }
+            | RVALUE '^' RVALUE             { $$.v =  $1.v + $3.v + "^"; }
+            | RVALUE '<' RVALUE             { $$.v =  $1.v + $3.v + "<"; }
+            | RVALUE '>' RVALUE             { $$.v =  $1.v + $3.v + ">"; }
+            | RVALUE '*' RVALUE             { $$.v =  $1.v + $3.v + "*"; }
+            | RVALUE '+' RVALUE             { $$.v =  $1.v + $3.v + "+"; }
+            | RVALUE '-' RVALUE             { $$.v =  $1.v + $3.v + "-"; }
+            | RVALUE '/' RVALUE             { $$.v =  $1.v + $3.v + "/"; }
+            | RVALUE '%' RVALUE             { $$.v =  $1.v + $3.v + "%"; }
+            | '+' RVALUE                    { $$.v =  $2.v; }
+            | '-' RVALUE                    { $$.v =  "0" + $2.v + "-"; }
+            | FINAL                         { $$.v =  $1.v; }
             ;
 
-CMD_DECL    : LET MULTI_DECL                { $$.v = logging("h",  $2.v); }
-            | VAR MULTI_DECL                { $$.v = logging("h",  $2.v); }
-            | CONST MULTI_DECL              { $$.v = logging("h",  $2.v); }
+CMD_DECL    : LET MULTI_DECL                { $$.v =  $2.v; }
+            | VAR MULTI_DECL                { $$.v =  $2.v; }
+            | CONST MULTI_DECL              { $$.v =  $2.v; }
             ;
 
-MULTI_DECL  : LVALUE '=' EXPR ',' MULTI_DECL    { $$.v = logging("i",  $1.v + " & " + $1.v + $3.v + " = " + " ^ " + $5.v); }
-            | LVALUE '=' EXPR                   { $$.v = logging("j",  $1.v + " & " + $1.v + $3.v + " = " + " ^ "); }
-            | ID ',' MULTI_DECL                 { $$.v = logging("k",  $1.v + " & " + $3.v); }
-            | ID                                { $$.v = logging("l",  $1.v + " & " ); }
+MULTI_DECL  : LVALUE '=' RVALUE ',' MULTI_DECL      { $$.v =  $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
+            | LVALUE '=' RVALUE                     { $$.v =  $1.v + "&" + $1.v + $3.v + "=" + "^"; }
+            | ID ',' MULTI_DECL                     { $$.v =  $1.v + "&" + $3.v; }
+            | ID                                    { $$.v =  $1.v + "&" ; }
             ;
 
-ATRIB       : LVALUE '=' EXPR               { $$.v = logging("m",  $1.v + $3.v + " = " + " ^ "); }
-            | LVALUE MAATR EXPR             { $$.v = logging("m",  $1.v + $1.v + " @ " + $3.v + " + = " + " ^ "); }
-            | LVALUEPROP '=' EXPR           { $$.v = logging("m",  $1.v + $3.v + " [=] " + " ^ "); }
-            | LVALUEPROP MEATR EXPR         { $$.v = logging("m",  $1.v + $1.v + " [@] " + $3.v + " + [=] " + " ^ "); }
+ATRIB       : LVALUE '=' RVALUE               { $$.v =  $1.v + $3.v + "="; }
+            | LVALUE MAATR RVALUE             { $$.v =  $1.v + $1.v + "@" + $3.v + "+" + "="; }
+            | LVALUEPROP '=' RVALUE           { $$.v =  $1.v + $3.v + "[=]"; }
+            | LVALUEPROP MEATR RVALUE         { $$.v =  $1.v + $1.v + "[@]" + $3.v + "+" + "[=]"; }
             ;
 
-FINAL       : NUM                           { $$.v = logging("n",  $1.v + " "); }
-            | STRING                        { $$.v = logging("n",  $1.v + " "); }
-            | NEWOBJECT                     { $$.v = logging("n",  string("{}") + " "); }
-            | NEWARRAY                      { $$.v = logging("n",  string("[]") + " "); }
-            | '(' EXPR ')'                  { $$.v = logging("n",  $2.v + " "); }
+FINAL       : NUM                           { $$.v =  $1.v; }
+            | STRING                        { $$.v =  $1.v; }
+            | NEWOBJECT                     { $$.v =  { string("{}") }; }
+            | NEWARRAY                      { $$.v =  { string("[]") }; }
+            | '(' RVALUE ')'                { $$.v =  $2.v; }
             // | FUNCAO
-            | LVALUE                        { $$.v = logging("n10",  $1.v + " @ "); }
-            | LVALUEPROP                    { $$.v = logging("n11",  $1.v + " [@] "); }
+            | LVALUE                        { $$.v =  $1.v + "@"; }
+            | LVALUEPROP                    { $$.v =  $1.v + "[@]"; }
             ; 
 
             // | ID '(' ')'
-            // | ID '(' EXPRS ')'
-// EXPRS       : EXPR ',' EXPRS
-//             | EXPR 
+            // | ID '(' RVALUES ')'
+// RVALUES       : RVALUE ',' RVALUES
+//             | RVALUE 
 //             ;
 
 
-BLOCO       : '{' CMDs '}'                  { $$.v = logging("q",  $1.v); }
-            ;
+// BLOCO       : '{' CMDs '}'                  { $$.v =  $1.v; }
+//             ;
   
 %%
 
@@ -148,24 +154,36 @@ string nome_token( int token ) {
 }
 
 int retorna( int tk ) {  
-    yylval.v = yytext; 
+    yylval.v = {yytext}; 
     coluna += strlen( yytext ); 
     return tk;
 }
 
+vector<string> concatena( vector<string> a, vector<string> b ) {
+    a.insert( a.end(), b.begin(), b.end() );
+    return a;
+}
+vector<string> operator+( vector<string> a, vector<string> b ) {
+    return concatena( a, b );
+}
+vector<string> operator+( vector<string> a, string b ) {
+    a.push_back( b );
+    return a;
+}
+vector<string> operator+( string a, vector<string> b ) {
+    b.push_back( a );
+    return b;
+}
+
 void yyerror( const char* msg ) {
-    cout << endl << "Erro: " << msg << endl << "Perto de : '" << yylval.v << "'" <<endl;
+    cout << "erro" << endl;
+    // cout << endl << "Erro: " << msg << endl << "Perto de : '" << yylval.v << "'" <<endl;
     exit( 0 );
 }
 
-void Print( string st ) {
-    cout << st << " ";
-}
-
-bool active_log = false;
-string logging( string id, string s ) {
-    if(active_log) return "[" + id + " ~ " + s + "]";
-    else return s;
+void Print( vector<string> st ) {
+    for( auto x: st )
+        cout << x << " ";
 }
 
 int main( int argc, char* argv[] ) {
