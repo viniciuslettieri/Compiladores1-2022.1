@@ -63,8 +63,36 @@ CMD         : RVALUE ';'                    { $$.v = $1.v + "^"; }
             | CMD_IF                        { $$.v = $1.v; }
             | CMD_FOR                       { $$.v = $1.v; }
             | CMD_FOR ';'                   { $$.v = $1.v; }
+            | CMD_WHILE                     { $$.v = $1.v; }
+            | CMD_WHILE ';'                 { $$.v = $1.v; }
             | BLOCO                         { $$.v = $1.v; }
             // | RVALUE                          { $$.v = $1.v + "\n"; }
+            ;
+
+CMD_IF      : IF '(' RVALUE ')' CMD             {   string ifok_label = gera_label("ifok");
+                                                    string ifend_label = gera_label("ifend");
+                                                    $$.v = $3.v + (ifok_label) + "?" + 
+                                                           (ifend_label) + "#" + 
+                                                           (":" + ifok_label) + $5.v + 
+                                                           (":" + ifend_label);   }
+
+            | IF '(' RVALUE ')' CMD ELSE CMD    {   string ifok_label = gera_label("ifok");
+                                                    string ifelse_label = gera_label("ifelse");
+                                                    string ifend_label = gera_label("ifend");
+                                                    $$.v = $3.v + (ifok_label) + "?" + 
+                                                           (ifelse_label) + "#" + 
+                                                           (":" + ifok_label) + $5.v + (ifend_label) + "#" + 
+                                                           (":" + ifelse_label) + $7.v + (":" + ifend_label);   }
+            ;
+
+CMD_WHILE   : WHILE '(' RVALUE ')' CMD          {   string whileexpr_label = gera_label("whileexpr");
+                                                    string whileend_label = gera_label("whileend");
+                                                    string whileok_label = gera_label("whileok");
+                                                    $$.v =  (":" + whileexpr_label) + $3.v + (whileok_label) + "?" + 
+                                                            (whileend_label) + "#" + 
+                                                            (":" + whileok_label) + $5.v + 
+                                                            (whileexpr_label) + "#" + 
+                                                            (":" + whileend_label);   }
             ;
 
 CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD     {   string forexpr_label = gera_label("forexpr");
@@ -85,22 +113,6 @@ CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD     {   string forex
                                                                            (":" + forok_label) + $9.v + 
                                                                            $7.v + "^" + (forexpr_label) + "#" + 
                                                                            (":" + forend_label);   }
-            ;
-
-CMD_IF      : IF '(' RVALUE ')' CMD             {   string ifok_label = gera_label("ifok");
-                                                    string ifend_label = gera_label("ifend");
-                                                    $$.v = $3.v + (ifok_label) + "?" + 
-                                                           (ifend_label) + "#" + 
-                                                           (":" + ifok_label) + $5.v + 
-                                                           (":" + ifend_label);   }
-
-            | IF '(' RVALUE ')' CMD ELSE CMD    {   string ifok_label = gera_label("ifok");
-                                                    string ifelse_label = gera_label("ifelse");
-                                                    string ifend_label = gera_label("ifend");
-                                                    $$.v = $3.v + (ifok_label) + "?" + 
-                                                           (ifelse_label) + "#" + 
-                                                           (":" + ifok_label) + $5.v + (ifend_label) + "#" + 
-                                                           (":" + ifelse_label) + $7.v + (":" + ifend_label);   }
             ;
 
 LVALUE      : ID                            { $$.v = $1.v; }
