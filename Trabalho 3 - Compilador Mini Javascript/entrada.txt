@@ -1,10 +1,5 @@
-let a = "ABA", c = 'CATE', resultado;
-if( a == c )
-  resultado = "Ta' errado!";
-else if( a < c )
-{
-  resultado = "a vem antes de c: ";
-  resultado += a + '<' + c ;
-}
-else
-  resultado = "Deu ruim!";
+let a = {}, campo = "c";
+
+for( let i = 0; i < 6; i = i + 2 ) {
+  a[campo = campo + i] = i;
+};

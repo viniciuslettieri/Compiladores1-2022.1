@@ -51,88 +51,112 @@ int coluna = 1;
 S           : CMDs                          { Print($1.v + "."); }
             ;
 
-CMDs        : CMD CMDs                      { $$.v =  $1.v + $2.v; }
+CMDs        : CMD CMDs                      { $$.v = $1.v + $2.v; }
             |                               { $$.v = {}; }
             ;
 
 // CMD         : CMD_FOR ';'
 //             | RVALUE ';'
 //             ;
-CMD         : RVALUE ';'                    { $$.v =  $1.v + "^"; }
-            | CMD_DECL ';'                  { $$.v =  $1.v; }
-            | CMD_IF                        { $$.v =  $1.v; }
-            | BLOCO                         { $$.v =  $1.v; }
-            // | RVALUE                          { $$.v =  $1.v + "\n"; }
+CMD         : RVALUE ';'                    { $$.v = $1.v + "^"; }
+            | CMD_DECL ';'                  { $$.v = $1.v; }
+            | CMD_IF                        { $$.v = $1.v; }
+            | CMD_FOR                       { $$.v = $1.v; }
+            | CMD_FOR ';'                   { $$.v = $1.v; }
+            | BLOCO                         { $$.v = $1.v; }
+            // | RVALUE                          { $$.v = $1.v + "\n"; }
             ;
 
-// CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD
-//             | FOR '(' ATRIB ';' RVALUE ';' ATRIB ')' CMD
-//             | FOR '(' RVALUE ';' RVALUE ';' ATRIB ')' CMD
-//             ;
+CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD     {   string forexpr_label = gera_label("forexpr");
+                                                                    string forend_label = gera_label("forend");
+                                                                    string forok_label = gera_label("forok");
+                                                                    $$.v = $3.v + 
+                                                                           (":" + forexpr_label) + $5.v + (forok_label) + "?" + 
+                                                                           (forend_label) + "#" + 
+                                                                           (":" + forok_label) + $9.v + 
+                                                                           $7.v + "^" + (forexpr_label) + "#" + 
+                                                                           (":" + forend_label);   }
+            | FOR '(' ATRIB ';' RVALUE ';' ATRIB ')' CMD        {   string forexpr_label = gera_label("forexpr");
+                                                                    string forend_label = gera_label("forend");
+                                                                    string forok_label = gera_label("forok");
+                                                                    $$.v = $3.v + "^" + 
+                                                                           (":" + forexpr_label) + $5.v + (forok_label) + "?" + 
+                                                                           (forend_label) + "#" + 
+                                                                           (":" + forok_label) + $9.v + 
+                                                                           $7.v + "^" + (forexpr_label) + "#" + 
+                                                                           (":" + forend_label);   }
+            ;
 
 CMD_IF      : IF '(' RVALUE ')' CMD             {   string ifok_label = gera_label("ifok");
                                                     string ifend_label = gera_label("ifend");
-                                                    $$.v = $3.v + (ifok_label) + "?" + (ifend_label) + "#" + (":" + ifok_label) + $5.v + (":" + ifend_label);   }
+                                                    $$.v = $3.v + (ifok_label) + "?" + 
+                                                           (ifend_label) + "#" + 
+                                                           (":" + ifok_label) + $5.v + 
+                                                           (":" + ifend_label);   }
+
             | IF '(' RVALUE ')' CMD ELSE CMD    {   string ifok_label = gera_label("ifok");
                                                     string ifelse_label = gera_label("ifelse");
                                                     string ifend_label = gera_label("ifend");
-                                                    $$.v = $3.v + (ifok_label) + "?" + (ifelse_label) + "#" + (":" + ifok_label) + $5.v + (ifend_label) + "#" + (":" + ifelse_label) + $7.v + (":" + ifend_label);   }
+                                                    $$.v = $3.v + (ifok_label) + "?" + 
+                                                           (ifelse_label) + "#" + 
+                                                           (":" + ifok_label) + $5.v + (ifend_label) + "#" + 
+                                                           (":" + ifelse_label) + $7.v + (":" + ifend_label);   }
             ;
 
-LVALUE      : ID                            { $$.v =  $1.v; }
+LVALUE      : ID                            { $$.v = $1.v; }
             ;
 
-LVALUEPROP  : RVALUE '.' ID                 { $$.v =  $1.v + $3.v; }
-            | RVALUE '[' RVALUE ']'         { $$.v =  $1.v + $3.v; } 
+LVALUEPROP  : RVALUE '.' ID                 { $$.v = $1.v + $3.v; }
+            | RVALUE '[' RVALUE ']'         { $$.v = $1.v + $3.v; } 
             ;
 
-RVALUE      : ATRIB                         { $$.v =  $1.v; }
-            | RVALUE MEIG RVALUE            { $$.v =  $1.v + $3.v + "<="; }
-            | RVALUE MAIG RVALUE            { $$.v =  $1.v + $3.v + ">="; }
-            | RVALUE IG RVALUE              { $$.v =  $1.v + $3.v + "=="; }
-            | RVALUE DIF RVALUE             { $$.v =  $1.v + $3.v + "!="; }
-            | RVALUE '^' RVALUE             { $$.v =  $1.v + $3.v + "^"; }
-            | RVALUE '<' RVALUE             { $$.v =  $1.v + $3.v + "<"; }
-            | RVALUE '>' RVALUE             { $$.v =  $1.v + $3.v + ">"; }
-            | RVALUE '*' RVALUE             { $$.v =  $1.v + $3.v + "*"; }
-            | RVALUE '+' RVALUE             { $$.v =  $1.v + $3.v + "+"; }
-            | RVALUE '-' RVALUE             { $$.v =  $1.v + $3.v + "-"; }
-            | RVALUE '/' RVALUE             { $$.v =  $1.v + $3.v + "/"; }
-            | RVALUE '%' RVALUE             { $$.v =  $1.v + $3.v + "%"; }
-            | LVALUE INCREM                 { $$.v =  $1.v + "@" + $1.v + $1.v + "@" + "1" + "+" + "=" + "^"; }
-            | LVALUE DECREM                 { $$.v =  $1.v + "@" + $1.v + $1.v + "@" + "1" + "-" + "=" + "^"; }
-            | '+' RVALUE                    { $$.v =  $2.v; }
-            | '-' RVALUE                    { $$.v =  "0" + $2.v + "-"; }
-            | FINAL                         { $$.v =  $1.v; }
+RVALUE      : ATRIB                         { $$.v = $1.v; }
+            | RVALUE MEIG RVALUE            { $$.v = $1.v + $3.v + "<="; }
+            | RVALUE MAIG RVALUE            { $$.v = $1.v + $3.v + ">="; }
+            | RVALUE IG RVALUE              { $$.v = $1.v + $3.v + "=="; }
+            | RVALUE DIF RVALUE             { $$.v = $1.v + $3.v + "!="; }
+            | RVALUE '^' RVALUE             { $$.v = $1.v + $3.v + "^"; }
+            | RVALUE '<' RVALUE             { $$.v = $1.v + $3.v + "<"; }
+            | RVALUE '>' RVALUE             { $$.v = $1.v + $3.v + ">"; }
+            | RVALUE '*' RVALUE             { $$.v = $1.v + $3.v + "*"; }
+            | RVALUE '+' RVALUE             { $$.v = $1.v + $3.v + "+"; }
+            | RVALUE '-' RVALUE             { $$.v = $1.v + $3.v + "-"; }
+            | RVALUE '/' RVALUE             { $$.v = $1.v + $3.v + "/"; }
+            | RVALUE '%' RVALUE             { $$.v = $1.v + $3.v + "%"; }
+            | LVALUE INCREM                 { $$.v = $1.v + "@" + $1.v + $1.v + "@" + "1" + "+" + "=" + "^"; }
+            | LVALUE DECREM                 { $$.v = $1.v + "@" + $1.v + $1.v + "@" + "1" + "-" + "=" + "^"; }
+            | '+' RVALUE                    { $$.v = $2.v; }
+            | '-' RVALUE                    { $$.v = "0" + $2.v + "-"; }
+            | FINAL                         { $$.v = $1.v; }
             ;
 
-CMD_DECL    : LET MULTI_DECL                { $$.v =  $2.v; }
-            | VAR MULTI_DECL                { $$.v =  $2.v; }
-            | CONST MULTI_DECL              { $$.v =  $2.v; }
+CMD_DECL    : LET MULTI_DECL                { $$.v = $2.v; }
+            | VAR MULTI_DECL                { $$.v = $2.v; }
+            | CONST MULTI_DECL              { $$.v = $2.v; }
             ;
 
-MULTI_DECL  : LVALUE '=' RVALUE ',' MULTI_DECL      { $$.v =  $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
-            | LVALUE '=' RVALUE                     { $$.v =  $1.v + "&" + $1.v + $3.v + "=" + "^"; }
-            | ID ',' MULTI_DECL                     { $$.v =  $1.v + "&" + $3.v; }
-            | ID                                    { $$.v =  $1.v + "&" ; }
+MULTI_DECL  : LVALUE '=' RVALUE ',' MULTI_DECL      { $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
+            | LVALUE '=' RVALUE                     { $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
+            | ID ',' MULTI_DECL                     { $$.v = $1.v + "&" + $3.v; }
+            | ID                                    { $$.v = $1.v + "&" ; }
             ;
 
-ATRIB       : LVALUE '=' RVALUE               { $$.v =  $1.v + $3.v + "="; }
-            | LVALUE MAATR RVALUE             { $$.v =  $1.v + $1.v + "@" + $3.v + "+" + "="; }
-            | LVALUE MEATR RVALUE             { $$.v =  $1.v + $1.v + "@" + $3.v + "-" + "="; }
-            | LVALUEPROP '=' RVALUE           { $$.v =  $1.v + $3.v + "[=]"; }
-            | LVALUEPROP MAATR RVALUE         { $$.v =  $1.v + $1.v + "[@]" + $3.v + "+" + "[=]"; }
-            | LVALUEPROP MEATR RVALUE         { $$.v =  $1.v + $1.v + "[@]" + $3.v + "-" + "[=]"; }
+ATRIB       : LVALUE '=' RVALUE               { $$.v = $1.v + $3.v + "="; }
+            | LVALUE MAATR RVALUE             { $$.v = $1.v + $1.v + "@" + $3.v + "+" + "="; }
+            | LVALUE MEATR RVALUE             { $$.v = $1.v + $1.v + "@" + $3.v + "-" + "="; }
+            | LVALUEPROP '=' RVALUE           { $$.v = $1.v + $3.v + "[=]"; }
+            | LVALUEPROP MAATR RVALUE         { $$.v = $1.v + $1.v + "[@]" + $3.v + "+" + "[=]"; }
+            | LVALUEPROP MEATR RVALUE         { $$.v = $1.v + $1.v + "[@]" + $3.v + "-" + "[=]"; }
             ;
 
-FINAL       : NUM                           { $$.v =  $1.v; }
-            | STRING                        { $$.v =  $1.v; }
-            | NEWOBJECT                     { $$.v =  { string("{}") }; }
-            | NEWARRAY                      { $$.v =  { string("[]") }; }
-            | '(' RVALUE ')'                { $$.v =  $2.v; }
+FINAL       : NUM                           { $$.v = $1.v; }
+            | STRING                        { $$.v = $1.v; }
+            | NEWOBJECT                     { $$.v = { string("{}") }; }
+            | NEWARRAY                      { $$.v = { string("[]") }; }
+            | '(' RVALUE ')'                { $$.v = $2.v; }
             // | FUNCAO
-            | LVALUE                        { $$.v =  $1.v + "@"; }
-            | LVALUEPROP                    { $$.v =  $1.v + "[@]"; }
+            | LVALUE                        { $$.v = $1.v + "@"; }
+            | LVALUEPROP                    { $$.v = $1.v + "[@]"; }
             ; 
 
             // | ID '(' ')'
@@ -142,7 +166,7 @@ FINAL       : NUM                           { $$.v =  $1.v; }
 //             ;
 
 
-BLOCO       : '{' CMDs '}'                  { $$.v =  $2.v; }
+BLOCO       : '{' CMDs '}'                  { $$.v = $2.v; }
             ;
   
 %%
