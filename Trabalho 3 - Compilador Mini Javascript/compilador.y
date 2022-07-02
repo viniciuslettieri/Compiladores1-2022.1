@@ -38,11 +38,11 @@ int coluna = 1;
 %token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR NEWOBJECT NEWARRAY 
 
 %right '=' MAATR MEATR 
-%nonassoc '<' '>' IG MEIG MAIG DIF '[' INCREM DECREM
-%left '.'
+%nonassoc '<' '>' IG MEIG MAIG DIF INCREM DECREM
 %left '+' '-'
 %left '*' '/' '%'
 %right '^'
+%nonassoc '.' '['
 
 %start S
 
@@ -62,11 +62,9 @@ CMD         : RVALUE ';'                    { $$.v = $1.v + "^"; }
             | CMD_DECL ';'                  { $$.v = $1.v; }
             | CMD_IF                        { $$.v = $1.v; }
             | CMD_FOR                       { $$.v = $1.v; }
-            | CMD_FOR ';'                   { $$.v = $1.v; }
             | CMD_WHILE                     { $$.v = $1.v; }
-            | CMD_WHILE ';'                 { $$.v = $1.v; }
             | BLOCO                         { $$.v = $1.v; }
-            // | RVALUE                          { $$.v = $1.v + "\n"; }
+            | ';'                           { $$.v = {}; }
             ;
 
 CMD_IF      : IF '(' RVALUE ')' CMD             {   string ifok_label = gera_label("ifok");
