@@ -37,108 +37,114 @@ Grammar
    19       | RVALUE '-' RVALUE
    20       | RVALUE '/' RVALUE
    21       | RVALUE '%' RVALUE
-   22       | '+' RVALUE
-   23       | '-' RVALUE
-   24       | FINAL
+   22       | LVALUE INCREM
+   23       | LVALUE DECREM
+   24       | '+' RVALUE
+   25       | '-' RVALUE
+   26       | FINAL
 
-   25 CMD_DECL: LET MULTI_DECL
-   26         | VAR MULTI_DECL
-   27         | CONST MULTI_DECL
+   27 CMD_DECL: LET MULTI_DECL
+   28         | VAR MULTI_DECL
+   29         | CONST MULTI_DECL
 
-   28 MULTI_DECL: LVALUE '=' RVALUE ',' MULTI_DECL
-   29           | LVALUE '=' RVALUE
-   30           | ID ',' MULTI_DECL
-   31           | ID
+   30 MULTI_DECL: LVALUE '=' RVALUE ',' MULTI_DECL
+   31           | LVALUE '=' RVALUE
+   32           | ID ',' MULTI_DECL
+   33           | ID
 
-   32 ATRIB: LVALUE '=' RVALUE
-   33      | LVALUE MAATR RVALUE
-   34      | LVALUEPROP '=' RVALUE
-   35      | LVALUEPROP MEATR RVALUE
+   34 ATRIB: LVALUE '=' RVALUE
+   35      | LVALUE MAATR RVALUE
+   36      | LVALUE MEATR RVALUE
+   37      | LVALUEPROP '=' RVALUE
+   38      | LVALUEPROP MAATR RVALUE
+   39      | LVALUEPROP MEATR RVALUE
 
-   36 FINAL: NUM
-   37      | STRING
-   38      | NEWOBJECT
-   39      | NEWARRAY
-   40      | '(' RVALUE ')'
-   41      | LVALUE
-   42      | LVALUEPROP
+   40 FINAL: NUM
+   41      | STRING
+   42      | NEWOBJECT
+   43      | NEWARRAY
+   44      | '(' RVALUE ')'
+   45      | LVALUE
+   46      | LVALUEPROP
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
     '%' (37) 21
-    '(' (40) 40
-    ')' (41) 40
+    '(' (40) 44
+    ')' (41) 44
     '*' (42) 17
-    '+' (43) 18 22
-    ',' (44) 28 30
-    '-' (45) 19 23
+    '+' (43) 18 24
+    ',' (44) 30 32
+    '-' (45) 19 25
     '.' (46) 7
     '/' (47) 20
     ';' (59) 4 5
     '<' (60) 15
-    '=' (61) 28 29 32 34
+    '=' (61) 30 31 34 37
     '>' (62) 16
     '[' (91) 8
     ']' (93) 8
     '^' (94) 14
     error (256)
     PRINT (258)
-    ID (259) 6 7 30 31
-    NUM (260) 36
+    ID (259) 6 7 32 33
+    NUM (260) 40
     MAIG (261) 11
     MEIG (262) 10
     IG (263) 12
     DIF (264) 13
-    MAATR (265) 33
-    MEATR (266) 35
-    STRING (267) 37
-    COMENTARIO (268)
-    LET (269) 25
-    CONST (270) 27
-    VAR (271) 26
-    IF (272)
-    WHILE (273)
-    FOR (274)
-    NEWOBJECT (275) 38
-    NEWARRAY (276) 39
+    MAATR (265) 35 38
+    MEATR (266) 36 39
+    INCREM (267) 22
+    DECREM (268) 23
+    STRING (269) 41
+    COMENTARIO (270)
+    LET (271) 27
+    CONST (272) 29
+    VAR (273) 28
+    IF (274)
+    WHILE (275)
+    FOR (276)
+    NEWOBJECT (277) 42
+    NEWARRAY (278) 43
 
 
 Nonterminals, with rules where they appear
 
-    $accept (38)
+    $accept (40)
         on left: 0
-    S (39)
+    S (41)
         on left: 1
         on right: 0
-    CMDs (40)
+    CMDs (42)
         on left: 2 3
         on right: 1 2
-    CMD (41)
+    CMD (43)
         on left: 4 5
         on right: 2
-    LVALUE (42)
+    LVALUE (44)
         on left: 6
-        on right: 28 29 32 33 41
-    LVALUEPROP (43)
+        on right: 22 23 30 31 34 35 36 45
+    LVALUEPROP (45)
         on left: 7 8
-        on right: 34 35 42
-    RVALUE (44)
-        on left: 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
-        on right: 4 7 8 10 11 12 13 14 15 16 17 18 19 20 21 22 23 28 29 32 33 34 35 40
-    CMD_DECL (45)
-        on left: 25 26 27
+        on right: 37 38 39 46
+    RVALUE (46)
+        on left: 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
+        on right: 4 7 8 10 11 12 13 14 15 16 17 18 19 20 21 24 25 30 31 34 35 36 37 38 39 44
+    CMD_DECL (47)
+        on left: 27 28 29
         on right: 5
-    MULTI_DECL (46)
-        on left: 28 29 30 31
-        on right: 25 26 27 28 30
-    ATRIB (47)
-        on left: 32 33 34 35
+    MULTI_DECL (48)
+        on left: 30 31 32 33
+        on right: 27 28 29 30 32
+    ATRIB (49)
+        on left: 34 35 36 37 38 39
         on right: 9
-    FINAL (48)
-        on left: 36 37 38 39 40 41 42
-        on right: 24
+    FINAL (50)
+        on left: 40 41 42 43 44 45 46
+        on right: 26
 
 
 State 0
@@ -179,21 +185,21 @@ State 1
 
 State 2
 
-   36 FINAL: NUM .
+   40 FINAL: NUM .
 
-    $default  reduce using rule 36 (FINAL)
+    $default  reduce using rule 40 (FINAL)
 
 
 State 3
 
-   37 FINAL: STRING .
+   41 FINAL: STRING .
 
-    $default  reduce using rule 37 (FINAL)
+    $default  reduce using rule 41 (FINAL)
 
 
 State 4
 
-   25 CMD_DECL: LET . MULTI_DECL
+   27 CMD_DECL: LET . MULTI_DECL
 
     ID  shift, and go to state 21
 
@@ -203,7 +209,7 @@ State 4
 
 State 5
 
-   27 CMD_DECL: CONST . MULTI_DECL
+   29 CMD_DECL: CONST . MULTI_DECL
 
     ID  shift, and go to state 21
 
@@ -213,7 +219,7 @@ State 5
 
 State 6
 
-   26 CMD_DECL: VAR . MULTI_DECL
+   28 CMD_DECL: VAR . MULTI_DECL
 
     ID  shift, and go to state 21
 
@@ -223,21 +229,21 @@ State 6
 
 State 7
 
-   38 FINAL: NEWOBJECT .
+   42 FINAL: NEWOBJECT .
 
-    $default  reduce using rule 38 (FINAL)
+    $default  reduce using rule 42 (FINAL)
 
 
 State 8
 
-   39 FINAL: NEWARRAY .
+   43 FINAL: NEWARRAY .
 
-    $default  reduce using rule 39 (FINAL)
+    $default  reduce using rule 43 (FINAL)
 
 
 State 9
 
-   22 RVALUE: '+' . RVALUE
+   24 RVALUE: '+' . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -257,7 +263,7 @@ State 9
 
 State 10
 
-   23 RVALUE: '-' . RVALUE
+   25 RVALUE: '-' . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -277,7 +283,7 @@ State 10
 
 State 11
 
-   40 FINAL: '(' . RVALUE ')'
+   44 FINAL: '(' . RVALUE ')'
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -339,26 +345,34 @@ State 14
 
 State 15
 
-   32 ATRIB: LVALUE . '=' RVALUE
-   33      | LVALUE . MAATR RVALUE
-   41 FINAL: LVALUE .
+   22 RVALUE: LVALUE . INCREM
+   23       | LVALUE . DECREM
+   34 ATRIB: LVALUE . '=' RVALUE
+   35      | LVALUE . MAATR RVALUE
+   36      | LVALUE . MEATR RVALUE
+   45 FINAL: LVALUE .
 
-    MAATR  shift, and go to state 31
-    '='    shift, and go to state 32
+    MAATR   shift, and go to state 31
+    MEATR   shift, and go to state 32
+    INCREM  shift, and go to state 33
+    DECREM  shift, and go to state 34
+    '='     shift, and go to state 35
 
-    $default  reduce using rule 41 (FINAL)
+    $default  reduce using rule 45 (FINAL)
 
 
 State 16
 
-   34 ATRIB: LVALUEPROP . '=' RVALUE
-   35      | LVALUEPROP . MEATR RVALUE
-   42 FINAL: LVALUEPROP .
+   37 ATRIB: LVALUEPROP . '=' RVALUE
+   38      | LVALUEPROP . MAATR RVALUE
+   39      | LVALUEPROP . MEATR RVALUE
+   46 FINAL: LVALUEPROP .
 
-    MEATR  shift, and go to state 33
-    '='    shift, and go to state 34
+    MAATR  shift, and go to state 36
+    MEATR  shift, and go to state 37
+    '='    shift, and go to state 38
 
-    $default  reduce using rule 42 (FINAL)
+    $default  reduce using rule 46 (FINAL)
 
 
 State 17
@@ -379,28 +393,28 @@ State 17
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    MAIG  shift, and go to state 35
-    MEIG  shift, and go to state 36
-    IG    shift, and go to state 37
-    DIF   shift, and go to state 38
-    '<'   shift, and go to state 39
-    '>'   shift, and go to state 40
-    '['   shift, and go to state 41
-    '.'   shift, and go to state 42
-    '+'   shift, and go to state 43
-    '-'   shift, and go to state 44
-    '*'   shift, and go to state 45
-    '/'   shift, and go to state 46
-    '%'   shift, and go to state 47
-    '^'   shift, and go to state 48
-    ';'   shift, and go to state 49
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+    ';'   shift, and go to state 53
 
 
 State 18
 
     5 CMD: CMD_DECL . ';'
 
-    ';'  shift, and go to state 50
+    ';'  shift, and go to state 54
 
 
 State 19
@@ -412,50 +426,50 @@ State 19
 
 State 20
 
-   24 RVALUE: FINAL .
+   26 RVALUE: FINAL .
 
-    $default  reduce using rule 24 (RVALUE)
+    $default  reduce using rule 26 (RVALUE)
 
 
 State 21
 
     6 LVALUE: ID .
-   30 MULTI_DECL: ID . ',' MULTI_DECL
-   31           | ID .
+   32 MULTI_DECL: ID . ',' MULTI_DECL
+   33           | ID .
 
-    ','  shift, and go to state 51
+    ','  shift, and go to state 55
 
-    ';'       reduce using rule 31 (MULTI_DECL)
+    ';'       reduce using rule 33 (MULTI_DECL)
     $default  reduce using rule 6 (LVALUE)
 
 
 State 22
 
-   28 MULTI_DECL: LVALUE . '=' RVALUE ',' MULTI_DECL
-   29           | LVALUE . '=' RVALUE
+   30 MULTI_DECL: LVALUE . '=' RVALUE ',' MULTI_DECL
+   31           | LVALUE . '=' RVALUE
 
-    '='  shift, and go to state 52
+    '='  shift, and go to state 56
 
 
 State 23
 
-   25 CMD_DECL: LET MULTI_DECL .
-
-    $default  reduce using rule 25 (CMD_DECL)
-
-
-State 24
-
-   27 CMD_DECL: CONST MULTI_DECL .
+   27 CMD_DECL: LET MULTI_DECL .
 
     $default  reduce using rule 27 (CMD_DECL)
 
 
+State 24
+
+   29 CMD_DECL: CONST MULTI_DECL .
+
+    $default  reduce using rule 29 (CMD_DECL)
+
+
 State 25
 
-   26 CMD_DECL: VAR MULTI_DECL .
+   28 CMD_DECL: VAR MULTI_DECL .
 
-    $default  reduce using rule 26 (CMD_DECL)
+    $default  reduce using rule 28 (CMD_DECL)
 
 
 State 26
@@ -474,14 +488,14 @@ State 26
    19       | RVALUE . '-' RVALUE
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
-   22       | '+' RVALUE .
+   24       | '+' RVALUE .
 
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
-    $default  reduce using rule 22 (RVALUE)
+    $default  reduce using rule 24 (RVALUE)
 
 
 State 27
@@ -500,14 +514,14 @@ State 27
    19       | RVALUE . '-' RVALUE
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
-   23       | '-' RVALUE .
+   25       | '-' RVALUE .
 
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
-    $default  reduce using rule 23 (RVALUE)
+    $default  reduce using rule 25 (RVALUE)
 
 
 State 28
@@ -526,23 +540,23 @@ State 28
    19       | RVALUE . '-' RVALUE
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
-   40 FINAL: '(' RVALUE . ')'
+   44 FINAL: '(' RVALUE . ')'
 
-    MAIG  shift, and go to state 35
-    MEIG  shift, and go to state 36
-    IG    shift, and go to state 37
-    DIF   shift, and go to state 38
-    '<'   shift, and go to state 39
-    '>'   shift, and go to state 40
-    '['   shift, and go to state 41
-    '.'   shift, and go to state 42
-    '+'   shift, and go to state 43
-    '-'   shift, and go to state 44
-    '*'   shift, and go to state 45
-    '/'   shift, and go to state 46
-    '%'   shift, and go to state 47
-    '^'   shift, and go to state 48
-    ')'   shift, and go to state 53
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+    ')'   shift, and go to state 57
 
 
 State 29
@@ -561,87 +575,7 @@ State 30
 
 State 31
 
-   33 ATRIB: LVALUE MAATR . RVALUE
-
-    ID         shift, and go to state 1
-    NUM        shift, and go to state 2
-    STRING     shift, and go to state 3
-    NEWOBJECT  shift, and go to state 7
-    NEWARRAY   shift, and go to state 8
-    '+'        shift, and go to state 9
-    '-'        shift, and go to state 10
-    '('        shift, and go to state 11
-
-    LVALUE      go to state 15
-    LVALUEPROP  go to state 16
-    RVALUE      go to state 54
-    ATRIB       go to state 19
-    FINAL       go to state 20
-
-
-State 32
-
-   32 ATRIB: LVALUE '=' . RVALUE
-
-    ID         shift, and go to state 1
-    NUM        shift, and go to state 2
-    STRING     shift, and go to state 3
-    NEWOBJECT  shift, and go to state 7
-    NEWARRAY   shift, and go to state 8
-    '+'        shift, and go to state 9
-    '-'        shift, and go to state 10
-    '('        shift, and go to state 11
-
-    LVALUE      go to state 15
-    LVALUEPROP  go to state 16
-    RVALUE      go to state 55
-    ATRIB       go to state 19
-    FINAL       go to state 20
-
-
-State 33
-
-   35 ATRIB: LVALUEPROP MEATR . RVALUE
-
-    ID         shift, and go to state 1
-    NUM        shift, and go to state 2
-    STRING     shift, and go to state 3
-    NEWOBJECT  shift, and go to state 7
-    NEWARRAY   shift, and go to state 8
-    '+'        shift, and go to state 9
-    '-'        shift, and go to state 10
-    '('        shift, and go to state 11
-
-    LVALUE      go to state 15
-    LVALUEPROP  go to state 16
-    RVALUE      go to state 56
-    ATRIB       go to state 19
-    FINAL       go to state 20
-
-
-State 34
-
-   34 ATRIB: LVALUEPROP '=' . RVALUE
-
-    ID         shift, and go to state 1
-    NUM        shift, and go to state 2
-    STRING     shift, and go to state 3
-    NEWOBJECT  shift, and go to state 7
-    NEWARRAY   shift, and go to state 8
-    '+'        shift, and go to state 9
-    '-'        shift, and go to state 10
-    '('        shift, and go to state 11
-
-    LVALUE      go to state 15
-    LVALUEPROP  go to state 16
-    RVALUE      go to state 57
-    ATRIB       go to state 19
-    FINAL       go to state 20
-
-
-State 35
-
-   11 RVALUE: RVALUE MAIG . RVALUE
+   35 ATRIB: LVALUE MAATR . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -659,9 +593,9 @@ State 35
     FINAL       go to state 20
 
 
-State 36
+State 32
 
-   10 RVALUE: RVALUE MEIG . RVALUE
+   36 ATRIB: LVALUE MEATR . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -679,9 +613,23 @@ State 36
     FINAL       go to state 20
 
 
-State 37
+State 33
 
-   12 RVALUE: RVALUE IG . RVALUE
+   22 RVALUE: LVALUE INCREM .
+
+    $default  reduce using rule 22 (RVALUE)
+
+
+State 34
+
+   23 RVALUE: LVALUE DECREM .
+
+    $default  reduce using rule 23 (RVALUE)
+
+
+State 35
+
+   34 ATRIB: LVALUE '=' . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -699,9 +647,9 @@ State 37
     FINAL       go to state 20
 
 
-State 38
+State 36
 
-   13 RVALUE: RVALUE DIF . RVALUE
+   38 ATRIB: LVALUEPROP MAATR . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -719,9 +667,9 @@ State 38
     FINAL       go to state 20
 
 
-State 39
+State 37
 
-   15 RVALUE: RVALUE '<' . RVALUE
+   39 ATRIB: LVALUEPROP MEATR . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -739,9 +687,9 @@ State 39
     FINAL       go to state 20
 
 
-State 40
+State 38
 
-   16 RVALUE: RVALUE '>' . RVALUE
+   37 ATRIB: LVALUEPROP '=' . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -759,9 +707,9 @@ State 40
     FINAL       go to state 20
 
 
-State 41
+State 39
 
-    8 LVALUEPROP: RVALUE '[' . RVALUE ']'
+   11 RVALUE: RVALUE MAIG . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -779,16 +727,29 @@ State 41
     FINAL       go to state 20
 
 
-State 42
+State 40
 
-    7 LVALUEPROP: RVALUE '.' . ID
+   10 RVALUE: RVALUE MEIG . RVALUE
 
-    ID  shift, and go to state 65
+    ID         shift, and go to state 1
+    NUM        shift, and go to state 2
+    STRING     shift, and go to state 3
+    NEWOBJECT  shift, and go to state 7
+    NEWARRAY   shift, and go to state 8
+    '+'        shift, and go to state 9
+    '-'        shift, and go to state 10
+    '('        shift, and go to state 11
+
+    LVALUE      go to state 15
+    LVALUEPROP  go to state 16
+    RVALUE      go to state 65
+    ATRIB       go to state 19
+    FINAL       go to state 20
 
 
-State 43
+State 41
 
-   18 RVALUE: RVALUE '+' . RVALUE
+   12 RVALUE: RVALUE IG . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -806,9 +767,9 @@ State 43
     FINAL       go to state 20
 
 
-State 44
+State 42
 
-   19 RVALUE: RVALUE '-' . RVALUE
+   13 RVALUE: RVALUE DIF . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -826,9 +787,9 @@ State 44
     FINAL       go to state 20
 
 
-State 45
+State 43
 
-   17 RVALUE: RVALUE '*' . RVALUE
+   15 RVALUE: RVALUE '<' . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -846,9 +807,9 @@ State 45
     FINAL       go to state 20
 
 
-State 46
+State 44
 
-   20 RVALUE: RVALUE '/' . RVALUE
+   16 RVALUE: RVALUE '>' . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -866,9 +827,9 @@ State 46
     FINAL       go to state 20
 
 
-State 47
+State 45
 
-   21 RVALUE: RVALUE '%' . RVALUE
+    8 LVALUEPROP: RVALUE '[' . RVALUE ']'
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -886,9 +847,16 @@ State 47
     FINAL       go to state 20
 
 
-State 48
+State 46
 
-   14 RVALUE: RVALUE '^' . RVALUE
+    7 LVALUEPROP: RVALUE '.' . ID
+
+    ID  shift, and go to state 71
+
+
+State 47
+
+   18 RVALUE: RVALUE '+' . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -901,39 +869,14 @@ State 48
 
     LVALUE      go to state 15
     LVALUEPROP  go to state 16
-    RVALUE      go to state 71
+    RVALUE      go to state 72
     ATRIB       go to state 19
     FINAL       go to state 20
 
 
-State 49
+State 48
 
-    4 CMD: RVALUE ';' .
-
-    $default  reduce using rule 4 (CMD)
-
-
-State 50
-
-    5 CMD: CMD_DECL ';' .
-
-    $default  reduce using rule 5 (CMD)
-
-
-State 51
-
-   30 MULTI_DECL: ID ',' . MULTI_DECL
-
-    ID  shift, and go to state 21
-
-    LVALUE      go to state 22
-    MULTI_DECL  go to state 72
-
-
-State 52
-
-   28 MULTI_DECL: LVALUE '=' . RVALUE ',' MULTI_DECL
-   29           | LVALUE '=' . RVALUE
+   19 RVALUE: RVALUE '-' . RVALUE
 
     ID         shift, and go to state 1
     NUM        shift, and go to state 2
@@ -951,123 +894,140 @@ State 52
     FINAL       go to state 20
 
 
+State 49
+
+   17 RVALUE: RVALUE '*' . RVALUE
+
+    ID         shift, and go to state 1
+    NUM        shift, and go to state 2
+    STRING     shift, and go to state 3
+    NEWOBJECT  shift, and go to state 7
+    NEWARRAY   shift, and go to state 8
+    '+'        shift, and go to state 9
+    '-'        shift, and go to state 10
+    '('        shift, and go to state 11
+
+    LVALUE      go to state 15
+    LVALUEPROP  go to state 16
+    RVALUE      go to state 74
+    ATRIB       go to state 19
+    FINAL       go to state 20
+
+
+State 50
+
+   20 RVALUE: RVALUE '/' . RVALUE
+
+    ID         shift, and go to state 1
+    NUM        shift, and go to state 2
+    STRING     shift, and go to state 3
+    NEWOBJECT  shift, and go to state 7
+    NEWARRAY   shift, and go to state 8
+    '+'        shift, and go to state 9
+    '-'        shift, and go to state 10
+    '('        shift, and go to state 11
+
+    LVALUE      go to state 15
+    LVALUEPROP  go to state 16
+    RVALUE      go to state 75
+    ATRIB       go to state 19
+    FINAL       go to state 20
+
+
+State 51
+
+   21 RVALUE: RVALUE '%' . RVALUE
+
+    ID         shift, and go to state 1
+    NUM        shift, and go to state 2
+    STRING     shift, and go to state 3
+    NEWOBJECT  shift, and go to state 7
+    NEWARRAY   shift, and go to state 8
+    '+'        shift, and go to state 9
+    '-'        shift, and go to state 10
+    '('        shift, and go to state 11
+
+    LVALUE      go to state 15
+    LVALUEPROP  go to state 16
+    RVALUE      go to state 76
+    ATRIB       go to state 19
+    FINAL       go to state 20
+
+
+State 52
+
+   14 RVALUE: RVALUE '^' . RVALUE
+
+    ID         shift, and go to state 1
+    NUM        shift, and go to state 2
+    STRING     shift, and go to state 3
+    NEWOBJECT  shift, and go to state 7
+    NEWARRAY   shift, and go to state 8
+    '+'        shift, and go to state 9
+    '-'        shift, and go to state 10
+    '('        shift, and go to state 11
+
+    LVALUE      go to state 15
+    LVALUEPROP  go to state 16
+    RVALUE      go to state 77
+    ATRIB       go to state 19
+    FINAL       go to state 20
+
+
 State 53
 
-   40 FINAL: '(' RVALUE ')' .
+    4 CMD: RVALUE ';' .
 
-    $default  reduce using rule 40 (FINAL)
+    $default  reduce using rule 4 (CMD)
 
 
 State 54
 
-    7 LVALUEPROP: RVALUE . '.' ID
-    8           | RVALUE . '[' RVALUE ']'
-   10 RVALUE: RVALUE . MEIG RVALUE
-   11       | RVALUE . MAIG RVALUE
-   12       | RVALUE . IG RVALUE
-   13       | RVALUE . DIF RVALUE
-   14       | RVALUE . '^' RVALUE
-   15       | RVALUE . '<' RVALUE
-   16       | RVALUE . '>' RVALUE
-   17       | RVALUE . '*' RVALUE
-   18       | RVALUE . '+' RVALUE
-   19       | RVALUE . '-' RVALUE
-   20       | RVALUE . '/' RVALUE
-   21       | RVALUE . '%' RVALUE
-   33 ATRIB: LVALUE MAATR RVALUE .
+    5 CMD: CMD_DECL ';' .
 
-    MAIG  shift, and go to state 35
-    MEIG  shift, and go to state 36
-    IG    shift, and go to state 37
-    DIF   shift, and go to state 38
-    '<'   shift, and go to state 39
-    '>'   shift, and go to state 40
-    '['   shift, and go to state 41
-    '.'   shift, and go to state 42
-    '+'   shift, and go to state 43
-    '-'   shift, and go to state 44
-    '*'   shift, and go to state 45
-    '/'   shift, and go to state 46
-    '%'   shift, and go to state 47
-    '^'   shift, and go to state 48
-
-    $default  reduce using rule 33 (ATRIB)
+    $default  reduce using rule 5 (CMD)
 
 
 State 55
 
-    7 LVALUEPROP: RVALUE . '.' ID
-    8           | RVALUE . '[' RVALUE ']'
-   10 RVALUE: RVALUE . MEIG RVALUE
-   11       | RVALUE . MAIG RVALUE
-   12       | RVALUE . IG RVALUE
-   13       | RVALUE . DIF RVALUE
-   14       | RVALUE . '^' RVALUE
-   15       | RVALUE . '<' RVALUE
-   16       | RVALUE . '>' RVALUE
-   17       | RVALUE . '*' RVALUE
-   18       | RVALUE . '+' RVALUE
-   19       | RVALUE . '-' RVALUE
-   20       | RVALUE . '/' RVALUE
-   21       | RVALUE . '%' RVALUE
-   32 ATRIB: LVALUE '=' RVALUE .
+   32 MULTI_DECL: ID ',' . MULTI_DECL
 
-    MAIG  shift, and go to state 35
-    MEIG  shift, and go to state 36
-    IG    shift, and go to state 37
-    DIF   shift, and go to state 38
-    '<'   shift, and go to state 39
-    '>'   shift, and go to state 40
-    '['   shift, and go to state 41
-    '.'   shift, and go to state 42
-    '+'   shift, and go to state 43
-    '-'   shift, and go to state 44
-    '*'   shift, and go to state 45
-    '/'   shift, and go to state 46
-    '%'   shift, and go to state 47
-    '^'   shift, and go to state 48
+    ID  shift, and go to state 21
 
-    $default  reduce using rule 32 (ATRIB)
+    LVALUE      go to state 22
+    MULTI_DECL  go to state 78
 
 
 State 56
 
-    7 LVALUEPROP: RVALUE . '.' ID
-    8           | RVALUE . '[' RVALUE ']'
-   10 RVALUE: RVALUE . MEIG RVALUE
-   11       | RVALUE . MAIG RVALUE
-   12       | RVALUE . IG RVALUE
-   13       | RVALUE . DIF RVALUE
-   14       | RVALUE . '^' RVALUE
-   15       | RVALUE . '<' RVALUE
-   16       | RVALUE . '>' RVALUE
-   17       | RVALUE . '*' RVALUE
-   18       | RVALUE . '+' RVALUE
-   19       | RVALUE . '-' RVALUE
-   20       | RVALUE . '/' RVALUE
-   21       | RVALUE . '%' RVALUE
-   35 ATRIB: LVALUEPROP MEATR RVALUE .
+   30 MULTI_DECL: LVALUE '=' . RVALUE ',' MULTI_DECL
+   31           | LVALUE '=' . RVALUE
 
-    MAIG  shift, and go to state 35
-    MEIG  shift, and go to state 36
-    IG    shift, and go to state 37
-    DIF   shift, and go to state 38
-    '<'   shift, and go to state 39
-    '>'   shift, and go to state 40
-    '['   shift, and go to state 41
-    '.'   shift, and go to state 42
-    '+'   shift, and go to state 43
-    '-'   shift, and go to state 44
-    '*'   shift, and go to state 45
-    '/'   shift, and go to state 46
-    '%'   shift, and go to state 47
-    '^'   shift, and go to state 48
+    ID         shift, and go to state 1
+    NUM        shift, and go to state 2
+    STRING     shift, and go to state 3
+    NEWOBJECT  shift, and go to state 7
+    NEWARRAY   shift, and go to state 8
+    '+'        shift, and go to state 9
+    '-'        shift, and go to state 10
+    '('        shift, and go to state 11
 
-    $default  reduce using rule 35 (ATRIB)
+    LVALUE      go to state 15
+    LVALUEPROP  go to state 16
+    RVALUE      go to state 79
+    ATRIB       go to state 19
+    FINAL       go to state 20
 
 
 State 57
 
+   44 FINAL: '(' RVALUE ')' .
+
+    $default  reduce using rule 44 (FINAL)
+
+
+State 58
+
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
    10 RVALUE: RVALUE . MEIG RVALUE
@@ -1082,27 +1042,207 @@ State 57
    19       | RVALUE . '-' RVALUE
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
-   34 ATRIB: LVALUEPROP '=' RVALUE .
+   35 ATRIB: LVALUE MAATR RVALUE .
 
-    MAIG  shift, and go to state 35
-    MEIG  shift, and go to state 36
-    IG    shift, and go to state 37
-    DIF   shift, and go to state 38
-    '<'   shift, and go to state 39
-    '>'   shift, and go to state 40
-    '['   shift, and go to state 41
-    '.'   shift, and go to state 42
-    '+'   shift, and go to state 43
-    '-'   shift, and go to state 44
-    '*'   shift, and go to state 45
-    '/'   shift, and go to state 46
-    '%'   shift, and go to state 47
-    '^'   shift, and go to state 48
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+
+    $default  reduce using rule 35 (ATRIB)
+
+
+State 59
+
+    7 LVALUEPROP: RVALUE . '.' ID
+    8           | RVALUE . '[' RVALUE ']'
+   10 RVALUE: RVALUE . MEIG RVALUE
+   11       | RVALUE . MAIG RVALUE
+   12       | RVALUE . IG RVALUE
+   13       | RVALUE . DIF RVALUE
+   14       | RVALUE . '^' RVALUE
+   15       | RVALUE . '<' RVALUE
+   16       | RVALUE . '>' RVALUE
+   17       | RVALUE . '*' RVALUE
+   18       | RVALUE . '+' RVALUE
+   19       | RVALUE . '-' RVALUE
+   20       | RVALUE . '/' RVALUE
+   21       | RVALUE . '%' RVALUE
+   36 ATRIB: LVALUE MEATR RVALUE .
+
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+
+    $default  reduce using rule 36 (ATRIB)
+
+
+State 60
+
+    7 LVALUEPROP: RVALUE . '.' ID
+    8           | RVALUE . '[' RVALUE ']'
+   10 RVALUE: RVALUE . MEIG RVALUE
+   11       | RVALUE . MAIG RVALUE
+   12       | RVALUE . IG RVALUE
+   13       | RVALUE . DIF RVALUE
+   14       | RVALUE . '^' RVALUE
+   15       | RVALUE . '<' RVALUE
+   16       | RVALUE . '>' RVALUE
+   17       | RVALUE . '*' RVALUE
+   18       | RVALUE . '+' RVALUE
+   19       | RVALUE . '-' RVALUE
+   20       | RVALUE . '/' RVALUE
+   21       | RVALUE . '%' RVALUE
+   34 ATRIB: LVALUE '=' RVALUE .
+
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
 
     $default  reduce using rule 34 (ATRIB)
 
 
-State 58
+State 61
+
+    7 LVALUEPROP: RVALUE . '.' ID
+    8           | RVALUE . '[' RVALUE ']'
+   10 RVALUE: RVALUE . MEIG RVALUE
+   11       | RVALUE . MAIG RVALUE
+   12       | RVALUE . IG RVALUE
+   13       | RVALUE . DIF RVALUE
+   14       | RVALUE . '^' RVALUE
+   15       | RVALUE . '<' RVALUE
+   16       | RVALUE . '>' RVALUE
+   17       | RVALUE . '*' RVALUE
+   18       | RVALUE . '+' RVALUE
+   19       | RVALUE . '-' RVALUE
+   20       | RVALUE . '/' RVALUE
+   21       | RVALUE . '%' RVALUE
+   38 ATRIB: LVALUEPROP MAATR RVALUE .
+
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+
+    $default  reduce using rule 38 (ATRIB)
+
+
+State 62
+
+    7 LVALUEPROP: RVALUE . '.' ID
+    8           | RVALUE . '[' RVALUE ']'
+   10 RVALUE: RVALUE . MEIG RVALUE
+   11       | RVALUE . MAIG RVALUE
+   12       | RVALUE . IG RVALUE
+   13       | RVALUE . DIF RVALUE
+   14       | RVALUE . '^' RVALUE
+   15       | RVALUE . '<' RVALUE
+   16       | RVALUE . '>' RVALUE
+   17       | RVALUE . '*' RVALUE
+   18       | RVALUE . '+' RVALUE
+   19       | RVALUE . '-' RVALUE
+   20       | RVALUE . '/' RVALUE
+   21       | RVALUE . '%' RVALUE
+   39 ATRIB: LVALUEPROP MEATR RVALUE .
+
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+
+    $default  reduce using rule 39 (ATRIB)
+
+
+State 63
+
+    7 LVALUEPROP: RVALUE . '.' ID
+    8           | RVALUE . '[' RVALUE ']'
+   10 RVALUE: RVALUE . MEIG RVALUE
+   11       | RVALUE . MAIG RVALUE
+   12       | RVALUE . IG RVALUE
+   13       | RVALUE . DIF RVALUE
+   14       | RVALUE . '^' RVALUE
+   15       | RVALUE . '<' RVALUE
+   16       | RVALUE . '>' RVALUE
+   17       | RVALUE . '*' RVALUE
+   18       | RVALUE . '+' RVALUE
+   19       | RVALUE . '-' RVALUE
+   20       | RVALUE . '/' RVALUE
+   21       | RVALUE . '%' RVALUE
+   37 ATRIB: LVALUEPROP '=' RVALUE .
+
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+
+    $default  reduce using rule 37 (ATRIB)
+
+
+State 64
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1120,13 +1260,13 @@ State 58
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '.'  shift, and go to state 42
-    '+'  shift, and go to state 43
-    '-'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '.'  shift, and go to state 46
+    '+'  shift, and go to state 47
+    '-'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
     MAIG  error (nonassociative)
     MEIG  error (nonassociative)
@@ -1139,7 +1279,7 @@ State 58
     $default  reduce using rule 11 (RVALUE)
 
 
-State 59
+State 65
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1157,13 +1297,13 @@ State 59
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '.'  shift, and go to state 42
-    '+'  shift, and go to state 43
-    '-'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '.'  shift, and go to state 46
+    '+'  shift, and go to state 47
+    '-'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
     MAIG  error (nonassociative)
     MEIG  error (nonassociative)
@@ -1176,7 +1316,7 @@ State 59
     $default  reduce using rule 10 (RVALUE)
 
 
-State 60
+State 66
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1194,13 +1334,13 @@ State 60
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '.'  shift, and go to state 42
-    '+'  shift, and go to state 43
-    '-'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '.'  shift, and go to state 46
+    '+'  shift, and go to state 47
+    '-'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
     MAIG  error (nonassociative)
     MEIG  error (nonassociative)
@@ -1213,7 +1353,7 @@ State 60
     $default  reduce using rule 12 (RVALUE)
 
 
-State 61
+State 67
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1231,13 +1371,13 @@ State 61
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '.'  shift, and go to state 42
-    '+'  shift, and go to state 43
-    '-'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '.'  shift, and go to state 46
+    '+'  shift, and go to state 47
+    '-'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
     MAIG  error (nonassociative)
     MEIG  error (nonassociative)
@@ -1250,7 +1390,7 @@ State 61
     $default  reduce using rule 13 (RVALUE)
 
 
-State 62
+State 68
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1268,13 +1408,13 @@ State 62
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '.'  shift, and go to state 42
-    '+'  shift, and go to state 43
-    '-'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '.'  shift, and go to state 46
+    '+'  shift, and go to state 47
+    '-'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
     MAIG  error (nonassociative)
     MEIG  error (nonassociative)
@@ -1287,7 +1427,7 @@ State 62
     $default  reduce using rule 15 (RVALUE)
 
 
-State 63
+State 69
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1305,13 +1445,13 @@ State 63
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '.'  shift, and go to state 42
-    '+'  shift, and go to state 43
-    '-'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '.'  shift, and go to state 46
+    '+'  shift, and go to state 47
+    '-'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
     MAIG  error (nonassociative)
     MEIG  error (nonassociative)
@@ -1324,7 +1464,7 @@ State 63
     $default  reduce using rule 16 (RVALUE)
 
 
-State 64
+State 70
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1342,31 +1482,31 @@ State 64
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    MAIG  shift, and go to state 35
-    MEIG  shift, and go to state 36
-    IG    shift, and go to state 37
-    DIF   shift, and go to state 38
-    '<'   shift, and go to state 39
-    '>'   shift, and go to state 40
-    '['   shift, and go to state 41
-    '.'   shift, and go to state 42
-    '+'   shift, and go to state 43
-    '-'   shift, and go to state 44
-    '*'   shift, and go to state 45
-    '/'   shift, and go to state 46
-    '%'   shift, and go to state 47
-    '^'   shift, and go to state 48
-    ']'   shift, and go to state 74
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+    ']'   shift, and go to state 80
 
 
-State 65
+State 71
 
     7 LVALUEPROP: RVALUE '.' ID .
 
     $default  reduce using rule 7 (LVALUEPROP)
 
 
-State 66
+State 72
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1384,15 +1524,15 @@ State 66
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
     $default  reduce using rule 18 (RVALUE)
 
 
-State 67
+State 73
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1410,15 +1550,15 @@ State 67
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
+    '*'  shift, and go to state 49
+    '/'  shift, and go to state 50
+    '%'  shift, and go to state 51
+    '^'  shift, and go to state 52
 
     $default  reduce using rule 19 (RVALUE)
 
 
-State 68
+State 74
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1436,12 +1576,12 @@ State 68
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '^'  shift, and go to state 48
+    '^'  shift, and go to state 52
 
     $default  reduce using rule 17 (RVALUE)
 
 
-State 69
+State 75
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1459,12 +1599,12 @@ State 69
    20       | RVALUE '/' RVALUE .
    21       | RVALUE . '%' RVALUE
 
-    '^'  shift, and go to state 48
+    '^'  shift, and go to state 52
 
     $default  reduce using rule 20 (RVALUE)
 
 
-State 70
+State 76
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1482,12 +1622,12 @@ State 70
    21       | RVALUE . '%' RVALUE
    21       | RVALUE '%' RVALUE .
 
-    '^'  shift, and go to state 48
+    '^'  shift, and go to state 52
 
     $default  reduce using rule 21 (RVALUE)
 
 
-State 71
+State 77
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1505,19 +1645,19 @@ State 71
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
 
-    '^'  shift, and go to state 48
+    '^'  shift, and go to state 52
 
     $default  reduce using rule 14 (RVALUE)
 
 
-State 72
+State 78
 
-   30 MULTI_DECL: ID ',' MULTI_DECL .
+   32 MULTI_DECL: ID ',' MULTI_DECL .
 
-    $default  reduce using rule 30 (MULTI_DECL)
+    $default  reduce using rule 32 (MULTI_DECL)
 
 
-State 73
+State 79
 
     7 LVALUEPROP: RVALUE . '.' ID
     8           | RVALUE . '[' RVALUE ']'
@@ -1533,47 +1673,47 @@ State 73
    19       | RVALUE . '-' RVALUE
    20       | RVALUE . '/' RVALUE
    21       | RVALUE . '%' RVALUE
-   28 MULTI_DECL: LVALUE '=' RVALUE . ',' MULTI_DECL
-   29           | LVALUE '=' RVALUE .
+   30 MULTI_DECL: LVALUE '=' RVALUE . ',' MULTI_DECL
+   31           | LVALUE '=' RVALUE .
 
-    MAIG  shift, and go to state 35
-    MEIG  shift, and go to state 36
-    IG    shift, and go to state 37
-    DIF   shift, and go to state 38
-    '<'   shift, and go to state 39
-    '>'   shift, and go to state 40
-    '['   shift, and go to state 41
-    '.'   shift, and go to state 42
-    '+'   shift, and go to state 43
-    '-'   shift, and go to state 44
-    '*'   shift, and go to state 45
-    '/'   shift, and go to state 46
-    '%'   shift, and go to state 47
-    '^'   shift, and go to state 48
-    ','   shift, and go to state 75
+    MAIG  shift, and go to state 39
+    MEIG  shift, and go to state 40
+    IG    shift, and go to state 41
+    DIF   shift, and go to state 42
+    '<'   shift, and go to state 43
+    '>'   shift, and go to state 44
+    '['   shift, and go to state 45
+    '.'   shift, and go to state 46
+    '+'   shift, and go to state 47
+    '-'   shift, and go to state 48
+    '*'   shift, and go to state 49
+    '/'   shift, and go to state 50
+    '%'   shift, and go to state 51
+    '^'   shift, and go to state 52
+    ','   shift, and go to state 81
 
-    $default  reduce using rule 29 (MULTI_DECL)
+    $default  reduce using rule 31 (MULTI_DECL)
 
 
-State 74
+State 80
 
     8 LVALUEPROP: RVALUE '[' RVALUE ']' .
 
     $default  reduce using rule 8 (LVALUEPROP)
 
 
-State 75
+State 81
 
-   28 MULTI_DECL: LVALUE '=' RVALUE ',' . MULTI_DECL
+   30 MULTI_DECL: LVALUE '=' RVALUE ',' . MULTI_DECL
 
     ID  shift, and go to state 21
 
     LVALUE      go to state 22
-    MULTI_DECL  go to state 76
+    MULTI_DECL  go to state 82
 
 
-State 76
+State 82
 
-   28 MULTI_DECL: LVALUE '=' RVALUE ',' MULTI_DECL .
+   30 MULTI_DECL: LVALUE '=' RVALUE ',' MULTI_DECL .
 
-    $default  reduce using rule 28 (MULTI_DECL)
+    $default  reduce using rule 30 (MULTI_DECL)

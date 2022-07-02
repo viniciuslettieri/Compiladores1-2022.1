@@ -34,6 +34,8 @@ WS	                    [ \t\n]
 "<>"	                { return retorna(DIF); }  
 "+="                    { return retorna(MAATR); }  
 "-="                    { return retorna(MEATR); }  
+"++"                    { return retorna(INCREM); }
+"--"                    { return retorna(DECREM); }
 
 "{}"                    { return retorna(NEWOBJECT); }
 "[]"                    { return retorna(NEWARRAY); }

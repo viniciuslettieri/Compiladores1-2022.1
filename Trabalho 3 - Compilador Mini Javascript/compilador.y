@@ -32,10 +32,10 @@ int coluna = 1;
 
 %}
 
-%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR STRING COMENTARIO LET CONST VAR IF WHILE FOR NEWOBJECT NEWARRAY
+%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF WHILE FOR NEWOBJECT NEWARRAY 
 
 %right '=' MAATR MEATR 
-%nonassoc '<' '>' IG MEIG MAIG DIF '[' 
+%nonassoc '<' '>' IG MEIG MAIG DIF '[' INCREM DECREM
 %left '.'
 %left '+' '-'
 %left '*' '/' '%'
@@ -48,7 +48,7 @@ int coluna = 1;
 S           : CMDs                          { Print($1.v + "."); }
             ;
 
-CMDs        : CMD CMDs                      { $$.v =  $1.v + "\n" + $2.v; }
+CMDs        : CMD CMDs                      { $$.v =  $1.v + $2.v; }
             |                               { $$.v = {}; }
             ;
 
@@ -90,6 +90,8 @@ RVALUE      : ATRIB                         { $$.v =  $1.v; }
             | RVALUE '-' RVALUE             { $$.v =  $1.v + $3.v + "-"; }
             | RVALUE '/' RVALUE             { $$.v =  $1.v + $3.v + "/"; }
             | RVALUE '%' RVALUE             { $$.v =  $1.v + $3.v + "%"; }
+            | LVALUE INCREM                 { $$.v =  $1.v + "@" + $1.v + $1.v + "@" + "1" + "+" + "=" + "^"; }
+            | LVALUE DECREM                 { $$.v =  $1.v + "@" + $1.v + $1.v + "@" + "1" + "-" + "=" + "^"; }
             | '+' RVALUE                    { $$.v =  $2.v; }
             | '-' RVALUE                    { $$.v =  "0" + $2.v + "-"; }
             | FINAL                         { $$.v =  $1.v; }
@@ -108,8 +110,10 @@ MULTI_DECL  : LVALUE '=' RVALUE ',' MULTI_DECL      { $$.v =  $1.v + "&" + $1.v 
 
 ATRIB       : LVALUE '=' RVALUE               { $$.v =  $1.v + $3.v + "="; }
             | LVALUE MAATR RVALUE             { $$.v =  $1.v + $1.v + "@" + $3.v + "+" + "="; }
+            | LVALUE MEATR RVALUE             { $$.v =  $1.v + $1.v + "@" + $3.v + "-" + "="; }
             | LVALUEPROP '=' RVALUE           { $$.v =  $1.v + $3.v + "[=]"; }
-            | LVALUEPROP MEATR RVALUE         { $$.v =  $1.v + $1.v + "[@]" + $3.v + "+" + "[=]"; }
+            | LVALUEPROP MAATR RVALUE         { $$.v =  $1.v + $1.v + "[@]" + $3.v + "+" + "[=]"; }
+            | LVALUEPROP MEATR RVALUE         { $$.v =  $1.v + $1.v + "[@]" + $3.v + "-" + "[=]"; }
             ;
 
 FINAL       : NUM                           { $$.v =  $1.v; }
@@ -171,7 +175,7 @@ vector<string> operator+( vector<string> a, string b ) {
     return a;
 }
 vector<string> operator+( string a, vector<string> b ) {
-    b.push_back( a );
+    b.insert(b.begin(), a);
     return b;
 }
 
@@ -182,8 +186,9 @@ void yyerror( const char* msg ) {
 }
 
 void Print( vector<string> st ) {
+    int linha = 0;
     for( auto x: st )
-        cout << x << " ";
+        cout << linha++ << ": " << x << "\n";
 }
 
 int main( int argc, char* argv[] ) {
