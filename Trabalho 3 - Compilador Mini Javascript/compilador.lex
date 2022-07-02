@@ -23,6 +23,7 @@ WS	                    [ \t\n]
 "const"                 { return retorna(CONST); }
 "var"                   { return retorna(VAR); }
 "if"                    { return retorna(IF); }
+"else"                  { return retorna(ELSE); }
 "while"                 { return retorna(WHILE); }
 "for"                   { return retorna(FOR); }
 

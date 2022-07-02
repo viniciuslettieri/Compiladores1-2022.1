@@ -35,7 +35,7 @@ int coluna = 1;
 
 %}
 
-%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF WHILE FOR NEWOBJECT NEWARRAY 
+%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR NEWOBJECT NEWARRAY 
 
 %right '=' MAATR MEATR 
 %nonassoc '<' '>' IG MEIG MAIG DIF '[' INCREM DECREM
@@ -61,7 +61,7 @@ CMDs        : CMD CMDs                      { $$.v =  $1.v + $2.v; }
 CMD         : RVALUE ';'                    { $$.v =  $1.v + "^"; }
             | CMD_DECL ';'                  { $$.v =  $1.v; }
             | CMD_IF                        { $$.v =  $1.v; }
-            // | BLOCO                         { $$.v =  $1.v; }
+            | BLOCO                         { $$.v =  $1.v; }
             // | RVALUE                          { $$.v =  $1.v + "\n"; }
             ;
 
@@ -70,9 +70,13 @@ CMD         : RVALUE ';'                    { $$.v =  $1.v + "^"; }
 //             | FOR '(' RVALUE ';' RVALUE ';' ATRIB ')' CMD
 //             ;
 
-CMD_IF      : IF '(' RVALUE ')' CMD         {   string ifok_label = gera_label("ifok");
-                                                string ifend_label = gera_label("ifend");
-                                                $$.v = $3.v + (ifok_label) + "?" + (ifend_label) + "#" + (":" + ifok_label) + $5.v + (":" + ifend_label);   }
+CMD_IF      : IF '(' RVALUE ')' CMD             {   string ifok_label = gera_label("ifok");
+                                                    string ifend_label = gera_label("ifend");
+                                                    $$.v = $3.v + (ifok_label) + "?" + (ifend_label) + "#" + (":" + ifok_label) + $5.v + (":" + ifend_label);   }
+            | IF '(' RVALUE ')' CMD ELSE CMD    {   string ifok_label = gera_label("ifok");
+                                                    string ifelse_label = gera_label("ifelse");
+                                                    string ifend_label = gera_label("ifend");
+                                                    $$.v = $3.v + (ifok_label) + "?" + (ifelse_label) + "#" + (":" + ifok_label) + $5.v + (ifend_label) + "#" + (":" + ifelse_label) + $7.v + (":" + ifend_label);   }
             ;
 
 LVALUE      : ID                            { $$.v =  $1.v; }
@@ -138,8 +142,8 @@ FINAL       : NUM                           { $$.v =  $1.v; }
 //             ;
 
 
-// BLOCO       : '{' CMDs '}'                  { $$.v =  $1.v; }
-//             ;
+BLOCO       : '{' CMDs '}'                  { $$.v =  $2.v; }
+            ;
   
 %%
 
@@ -214,6 +218,7 @@ void yyerror( const char* msg ) {
 void Print( vector<string> st ) {
     int linha = 0;
     vector<string> enderecos_resolvidos = resolve_enderecos(st);
+    // vector<string> enderecos_resolvidos = st;
     for( auto x: enderecos_resolvidos )
         // cout << linha++ << ": ";
         cout << x << "\n";
