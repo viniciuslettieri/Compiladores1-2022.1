@@ -18,6 +18,9 @@ void Print( vector<string> st );
 int retorna( int tk );
 string nome_token( int token );
 
+string gera_label( string prefixo );
+vector<string> resolve_enderecos( vector<string> entrada );
+
 vector<string> concatena( vector<string> a, vector<string> b );
 vector<string> operator+( vector<string> a, vector<string> b );
 vector<string> operator+( vector<string> a, string b );
@@ -57,7 +60,7 @@ CMDs        : CMD CMDs                      { $$.v =  $1.v + $2.v; }
 //             ;
 CMD         : RVALUE ';'                    { $$.v =  $1.v + "^"; }
             | CMD_DECL ';'                  { $$.v =  $1.v; }
-            // | CMD_IF ';'                    { $$.v =  $1.v + "\n"; }
+            | CMD_IF                        { $$.v =  $1.v; }
             // | BLOCO                         { $$.v =  $1.v; }
             // | RVALUE                          { $$.v =  $1.v + "\n"; }
             ;
@@ -67,8 +70,10 @@ CMD         : RVALUE ';'                    { $$.v =  $1.v + "^"; }
 //             | FOR '(' RVALUE ';' RVALUE ';' ATRIB ')' CMD
 //             ;
 
-// CMD_IF      : IF '(' RVALUE ')' CMD           { $$.v = $; }
-//             ;
+CMD_IF      : IF '(' RVALUE ')' CMD         {   string ifok_label = gera_label("ifok");
+                                                string ifend_label = gera_label("ifend");
+                                                $$.v = $3.v + (ifok_label) + "?" + (ifend_label) + "#" + (":" + ifok_label) + $5.v + (":" + ifend_label);   }
+            ;
 
 LVALUE      : ID                            { $$.v =  $1.v; }
             ;
@@ -163,6 +168,27 @@ int retorna( int tk ) {
     return tk;
 }
 
+string gera_label( string prefixo ) {
+    static int n_label = 0;
+    return prefixo + "_" + to_string( ++n_label ) + ":";
+}
+
+vector<string> resolve_enderecos( vector<string> entrada ) {
+    map<string,int> label;
+    vector<string> saida;
+    for( int i = 0; i < entrada.size(); i++ )
+        if( entrada[i][0] == ':' ) 
+            label[entrada[i].substr(1)] = saida.size();
+        else
+            saida.push_back( entrada[i] );
+
+    for( int i = 0; i < saida.size(); i++ ) 
+        if( label.count( saida[i] ) > 0 )
+            saida[i] = to_string(label[saida[i]]);
+
+    return saida;
+}
+
 vector<string> concatena( vector<string> a, vector<string> b ) {
     a.insert( a.end(), b.begin(), b.end() );
     return a;
@@ -180,15 +206,17 @@ vector<string> operator+( string a, vector<string> b ) {
 }
 
 void yyerror( const char* msg ) {
-    cout << "erro" << endl;
-    // cout << endl << "Erro: " << msg << endl << "Perto de : '" << yylval.v << "'" <<endl;
+    // cout << "erro" << yytext << endl;
+    cout << endl << "Erro: " << msg << endl << "Perto de : '" << yylval.v[0] << "'" <<endl;
     exit( 0 );
 }
 
 void Print( vector<string> st ) {
     int linha = 0;
-    for( auto x: st )
-        cout << linha++ << ": " << x << "\n";
+    vector<string> enderecos_resolvidos = resolve_enderecos(st);
+    for( auto x: enderecos_resolvidos )
+        // cout << linha++ << ": ";
+        cout << x << "\n";
 }
 
 int main( int argc, char* argv[] ) {
