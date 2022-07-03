@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <unordered_map>
 
 using namespace std;
 
@@ -20,6 +21,9 @@ string nome_token( int token );
 
 string gera_label( string prefixo );
 vector<string> resolve_enderecos( vector<string> entrada );
+void trata_declaracoes( string id, string tipo );
+void trata_uso( string id );
+void trata_atribuicao( string id );
 
 vector<string> concatena( vector<string> a, vector<string> b );
 vector<string> operator+( vector<string> a, vector<string> b );
@@ -32,6 +36,9 @@ void yyerror(const char *);
 
 int linha = 1;
 int coluna = 1;
+
+// Controle de Variaveis Declaradas
+unordered_map<string, pair<string, int>> declarations;
 
 %}
 
@@ -113,7 +120,7 @@ CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD     {   string forex
                                                                            (":" + forend_label);   }
             ;
 
-LVALUE      : ID                            { $$.v = $1.v; }
+LVALUE      : ID                            { trata_uso( $1.v[0] ); $$.v = $1.v; }
             ;
 
 LVALUEPROP  : RVALUE '.' ID                 { $$.v = $1.v + $3.v; }
@@ -140,23 +147,44 @@ RVALUE      : ATRIB                         { $$.v = $1.v; }
             | FINAL                         { $$.v = $1.v; }
             ;
 
-CMD_DECL    : LET MULTI_DECL                { $$.v = $2.v; }
-            | VAR MULTI_DECL                { $$.v = $2.v; }
-            | CONST MULTI_DECL              { $$.v = $2.v; }
+CMD_DECL    : CMD_LET                           { $$.v = $1.v; }
+            | CMD_VAR                           { $$.v = $1.v; }
+            | CMD_CONST                         { $$.v = $1.v; }
             ;
 
-MULTI_DECL  : LVALUE '=' RVALUE ',' MULTI_DECL      { $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
-            | LVALUE '=' RVALUE                     { $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
-            | ID ',' MULTI_DECL                     { $$.v = $1.v + "&" + $3.v; }
-            | ID                                    { $$.v = $1.v + "&" ; }
+CMD_LET     : LET MULTI_LET                     { $$.v = $2.v; }
             ;
 
-ATRIB       : LVALUE '=' RVALUE               { $$.v = $1.v + $3.v + "="; }
-            | LVALUE MAATR RVALUE             { $$.v = $1.v + $1.v + "@" + $3.v + "+" + "="; }
-            | LVALUE MEATR RVALUE             { $$.v = $1.v + $1.v + "@" + $3.v + "-" + "="; }
-            | LVALUEPROP '=' RVALUE           { $$.v = $1.v + $3.v + "[=]"; }
-            | LVALUEPROP MAATR RVALUE         { $$.v = $1.v + $1.v + "[@]" + $3.v + "+" + "[=]"; }
-            | LVALUEPROP MEATR RVALUE         { $$.v = $1.v + $1.v + "[@]" + $3.v + "-" + "[=]"; }
+MULTI_LET   : ID '=' RVALUE ',' MULTI_LET       { trata_declaracoes($1.v[0], "let"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
+            | ID '=' RVALUE                     { trata_declaracoes($1.v[0], "let"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
+            | ID ',' MULTI_LET                  { trata_declaracoes($1.v[0], "let"); $$.v = $1.v + "&" + $3.v; }
+            | ID                                { trata_declaracoes($1.v[0], "let"); $$.v = $1.v + "&"; }
+            ;
+
+CMD_VAR     : VAR MULTI_VAR                     { $$.v = $2.v; }
+            ;
+
+MULTI_VAR   : ID '=' RVALUE ',' MULTI_VAR       { trata_declaracoes($1.v[0], "var"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
+            | ID '=' RVALUE                     { trata_declaracoes($1.v[0], "var"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
+            | ID ',' MULTI_VAR                  { trata_declaracoes($1.v[0], "var"); $$.v = $1.v + "&" + $3.v; }
+            | ID                                { trata_declaracoes($1.v[0], "var"); $$.v = $1.v + "&"; }
+            ;
+
+CMD_CONST   : CONST MULTI_CONST                 { $$.v = $2.v; }
+            ;
+
+MULTI_CONST : ID '=' RVALUE ',' MULTI_CONST     { trata_declaracoes($1.v[0], "const"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
+            | ID '=' RVALUE                     { trata_declaracoes($1.v[0], "const"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
+            | ID ',' MULTI_CONST                { trata_declaracoes($1.v[0], "const"); $$.v = $1.v + "&" + $3.v; }
+            | ID                                { trata_declaracoes($1.v[0], "const"); $$.v = $1.v + "&"; }
+            ;
+
+ATRIB       : LVALUE '=' RVALUE                 { trata_atribuicao($1.v[0]); $$.v = $1.v + $3.v + "="; }
+            | LVALUE MAATR RVALUE               { trata_atribuicao($1.v[0]); $$.v = $1.v + $1.v + "@" + $3.v + "+" + "="; }
+            | LVALUE MEATR RVALUE               { trata_atribuicao($1.v[0]); $$.v = $1.v + $1.v + "@" + $3.v + "-" + "="; }
+            | LVALUEPROP '=' RVALUE             { trata_atribuicao($1.v[0]); $$.v = $1.v + $3.v + "[=]"; }
+            | LVALUEPROP MAATR RVALUE           { trata_atribuicao($1.v[0]); $$.v = $1.v + $1.v + "[@]" + $3.v + "+" + "[=]"; }
+            | LVALUEPROP MEATR RVALUE           { trata_atribuicao($1.v[0]); $$.v = $1.v + $1.v + "[@]" + $3.v + "-" + "[=]"; }
             ;
 
 FINAL       : NUM                           { $$.v = $1.v; }
@@ -244,9 +272,48 @@ vector<string> operator+( string a, vector<string> b ) {
 }
 
 void yyerror( const char* msg ) {
-    // cout << "erro" << yytext << endl;
-    cout << endl << "Erro: " << msg << endl << "Perto de : '" << yylval.v[0] << "'" <<endl;
-    exit( 0 );
+    cout << msg << endl;
+    exit(1);
+}
+
+void trata_declaracoes( string id, string tipo ){
+    auto decl_type = declarations.find(id);
+    if(decl_type == declarations.end()){
+        declarations[id] = {tipo, linha};
+        return;
+    }else if(tipo == "let"){
+        string linha_decl = to_string(decl_type->second.second);
+        string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
+        yyerror(msg.c_str());
+    }else if(tipo == "var"){
+        if(decl_type->second.first != "var"){
+            string linha_decl = to_string(decl_type->second.second);
+            string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
+            yyerror(msg.c_str());
+        }
+    }else if(tipo == "const"){
+        string linha_decl = to_string(decl_type->second.second);
+        string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
+        yyerror(msg.c_str());
+    }
+}
+
+void trata_uso( string id ){
+    auto decl_type = declarations.find(id);
+    if(decl_type == declarations.end()){
+        string msg = "Erro: a variável '" + id + "' não foi declarada.";
+        yyerror(msg.c_str());
+    }
+}
+
+void trata_atribuicao( string id ){
+    auto decl_type = declarations.find(id);
+    if(decl_type == declarations.end()){
+        return;
+    }else if(decl_type->second.first == "const"){
+        string msg = "Erro: tentativa de modificar uma variável constante ('" + id + "').";
+        yyerror(msg.c_str());
+    }
 }
 
 void Print( vector<string> st ) {
