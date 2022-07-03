@@ -62,9 +62,6 @@ CMDs        : CMD CMDs                      { $$.v = $1.v + $2.v; }
             |                               { $$.v = {}; }
             ;
 
-// CMD         : CMD_FOR ';'
-//             | RVALUE ';'
-//             ;
 CMD         : RVALUE ';'                    { $$.v = $1.v + "^"; }
             | CMD_DECL ';'                  { $$.v = $1.v; }
             | CMD_IF                        { $$.v = $1.v; }
@@ -192,16 +189,9 @@ FINAL       : NUM                           { $$.v = $1.v; }
             | NEWOBJECT                     { $$.v = { string("{}") }; }
             | NEWARRAY                      { $$.v = { string("[]") }; }
             | '(' RVALUE ')'                { $$.v = $2.v; }
-            // | FUNCAO
             | LVALUE                        { $$.v = $1.v + "@"; }
             | LVALUEPROP                    { $$.v = $1.v + "[@]"; }
             ; 
-
-            // | ID '(' ')'
-            // | ID '(' RVALUES ')'
-// RVALUES       : RVALUE ',' RVALUES
-//             | RVALUE 
-//             ;
 
 
 BLOCO       : '{' CMDs '}'                  { $$.v = $2.v; }
@@ -319,9 +309,7 @@ void trata_atribuicao( string id ){
 void Print( vector<string> st ) {
     int linha = 0;
     vector<string> enderecos_resolvidos = resolve_enderecos(st);
-    // vector<string> enderecos_resolvidos = st;
     for( auto x: enderecos_resolvidos )
-        // cout << linha++ << ": ";
         cout << x << "\n";
 }
 
