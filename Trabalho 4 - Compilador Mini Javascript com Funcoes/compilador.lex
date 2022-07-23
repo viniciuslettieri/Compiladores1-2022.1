@@ -18,7 +18,6 @@ WS	                    [ \t\n]
 
 {NUM}	                { return retorna(NUM); }
 
-"print"                 { return retorna(PRINT); }
 "let"                   { return retorna(LET); }
 "const"                 { return retorna(CONST); }
 "var"                   { return retorna(VAR); }
@@ -28,6 +27,9 @@ WS	                    [ \t\n]
 "for"                   { return retorna(FOR); }
 "function"              { return retorna(FUNCTION); }
 "return"                { return retorna(RETURN); }
+
+"true"                  { return retorna(TRUE); }
+"false"                 { return retorna(FALSE); }
 
 "asm{".*"}"             { string lexema = trim( yytext + 3, "{}" ); 
                           yylval.v = tokeniza( lexema, ' ' );

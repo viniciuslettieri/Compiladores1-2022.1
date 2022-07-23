@@ -53,7 +53,7 @@ vector<string> function_area;
 
 %}
 
-%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR FUNCTION RETURN ASM
+%token ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR FUNCTION RETURN ASM TRUE FALSE
 
 %right '=' MAATR MEATR 
 %nonassoc '<' '>' IG MEIG MAIG DIF INCREM DECREM
@@ -241,6 +241,8 @@ FINAL       : NUM                           { $$.v = $1.v; }
             | '(' RVALUE ')'                { $$.v = $2.v; }
             | LVALUE                        { $$.v = $1.v + "@"; }
             | LVALUEPROP                    { $$.v = $1.v + "[@]"; }
+            | TRUE                          { $$.v = {"true"}; }
+            | FALSE                         { $$.v = {"false"}; }
             ; 
 
 ARGS        : RVALUE ',' ARGS                           {   $$.v = $1.v + $3.v;
@@ -257,7 +259,6 @@ BLOCO       : '{' { abre_escopo(); } CMDs { fecha_escopo(); } '}'           { $$
 #include "lex.yy.c"
 
 map<int, string> nome_tokens = {
-    { PRINT, "print" },
     { STRING, "string" },
     { ID, "nome de identificador" },
     { NUM, "número" }
