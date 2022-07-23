@@ -1648,19 +1648,19 @@ yyreduce:
 
   case 19:
 #line 95 "compilador.y"
-                              { abre_escopo(); }
+                              { trata_declaracoes(yyvsp[-1].v[0], "function"); abre_escopo();  }
 #line 1653 "y.tab.c"
     break;
 
   case 20:
 #line 95 "compilador.y"
-                                                                  { fecha_escopo(); }
+                                                                                                           { fecha_escopo(); }
 #line 1659 "y.tab.c"
     break;
 
   case 21:
 #line 96 "compilador.y"
-                                                        {   trata_declaracoes(yyvsp[-7].v[0], "function");
+                                                        {   
                                                             string funcao_label = gera_label("funcao" + yyvsp[-7].v[0]); 
                                                             function_area = function_area + (":" + funcao_label) + 
                                                                             yyvsp[-2].v + default_return; 
@@ -1670,19 +1670,19 @@ yyreduce:
 
   case 22:
 #line 101 "compilador.y"
-                              { abre_escopo(); }
+                              { trata_declaracoes(yyvsp[-1].v[0], "function"); abre_escopo(); }
 #line 1675 "y.tab.c"
     break;
 
   case 23:
 #line 101 "compilador.y"
-                                                                          { fecha_escopo(); }
+                                                                                                                  { fecha_escopo(); }
 #line 1681 "y.tab.c"
     break;
 
   case 24:
 #line 102 "compilador.y"
-                                                        {   trata_declaracoes(yyvsp[-8].v[0], "function");
+                                                        {   
                                                             string funcao_label = gera_label("funcao" + yyvsp[-8].v[0]); 
                                                             function_area = function_area + (":" + funcao_label) + 
                                                                             yyvsp[-5].v + yyvsp[-2].v + default_return; 

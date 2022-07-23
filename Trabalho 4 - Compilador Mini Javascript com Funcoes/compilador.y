@@ -92,14 +92,14 @@ CMD         : CMD_DECL ';'                  { $$.v = $1.v; }
 
 CMD_RETURN  : RETURN RVALUE ';'                         {   $$.v = $2.v + "'&retorno'" + "@" + "~"; } 
 
-CMD_FUNCTION: FUNCTION ID '(' { abre_escopo(); } ')' '{' CMDz '}' { fecha_escopo(); }          
-                                                        {   trata_declaracoes($2.v[0], "function");
+CMD_FUNCTION: FUNCTION ID '(' { trata_declaracoes($2.v[0], "function"); abre_escopo();  } ')' '{' CMDz '}' { fecha_escopo(); }          
+                                                        {   
                                                             string funcao_label = gera_label("funcao" + $2.v[0]); 
                                                             function_area = function_area + (":" + funcao_label) + 
                                                                             $7.v + default_return; 
                                                             $$.v = $2.v + "&" + $2.v + "{}" + "=" + "'&funcao'" + funcao_label + "[=]" + "^"; }
-            | FUNCTION ID '(' { abre_escopo(); } PARAMS ')' '{'  CMDz '}' { fecha_escopo(); }
-                                                        {   trata_declaracoes($2.v[0], "function");
+            | FUNCTION ID '(' { trata_declaracoes($2.v[0], "function"); abre_escopo(); } PARAMS ')' '{'  CMDz '}' { fecha_escopo(); }
+                                                        {   
                                                             string funcao_label = gera_label("funcao" + $2.v[0]); 
                                                             function_area = function_area + (":" + funcao_label) + 
                                                                             $5.v + $8.v + default_return; 
