@@ -26,6 +26,8 @@ WS	                    [ \t\n]
 "else"                  { return retorna(ELSE); }
 "while"                 { return retorna(WHILE); }
 "for"                   { return retorna(FOR); }
+"function"              { return retorna(FUNCTION); }
+"return"                { return retorna(RETURN); }
 
 {ID}	                { return retorna(ID); }
 

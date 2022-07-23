@@ -12,6 +12,7 @@ struct Atributos {
     vector<string> v;
 };
 
+
 #define YYSTYPE Atributos
 
 void erro( string msg );
@@ -39,10 +40,16 @@ int coluna = 1;
 
 // Controle de Variaveis Declaradas
 vector< unordered_map<string, pair<string, int>> > declarations = {{}};
+void abre_escopo();
+void fecha_escopo();
+
+// Tratamento de Funcoes
+vector<string> default_return = { "undefined", "@", "'&retorno'", "@", "~" };
+vector<string> function_area;
 
 %}
 
-%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR NEWOBJECT NEWARRAY 
+%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR NEWARRAY FUNCTION RETURN
 
 %right '=' MAATR MEATR 
 %nonassoc '<' '>' IG MEIG MAIG DIF INCREM DECREM
@@ -55,21 +62,35 @@ vector< unordered_map<string, pair<string, int>> > declarations = {{}};
 
 %%
 
-S           : CMDs                          { Print($1.v + "."); }
+S           : CMDz                          { Print($1.v + "." + function_area); }
             ;
 
-CMDs        : CMD CMDs                      { $$.v = $1.v + $2.v; }
+CMDz        : CMD CMDz                      { $$.v = $1.v + $2.v; }
             |                               { $$.v = {}; }
             ;
 
-CMD         : RVALUE ';'                    { $$.v = $1.v + "^"; }
-            | CMD_DECL ';'                  { $$.v = $1.v; }
+CMDs        : CMD CMDs                      { $$.v = $1.v + $2.v; }
+            | CMD                           { $$.v = $1.v; }
+            ;
+
+CMD         : CMD_DECL ';'                  { $$.v = $1.v; }
             | CMD_IF                        { $$.v = $1.v; }
             | CMD_FOR                       { $$.v = $1.v; }
             | CMD_WHILE                     { $$.v = $1.v; }
-            | BLOCO                         { $$.v = $1.v; }
+            | CMD_FUNCTION                  { $$.v = $1.v; }
+            | CMD_RETURN                    { $$.v = $1.v; }
             | ';'                           { $$.v = {}; }
+            | EXPR ';'                      { $$.v = $1.v + "^"; }
+            | ATRIB ';'                     { $$.v = $1.v + "^"; }
+            | BLOCO                         { $$.v = $1.v; }
             ;
+
+CMD_RETURN  : RETURN RVALUE ';'             { $$.v = $2.v + "'&retorno'" + "@" + "~"; } 
+
+CMD_FUNCTION: FUNCTION ID '(' ')' '{' CMDz '}'  {   string funcao_label = gera_label("funcao" + $2.v[0]); 
+                                                    function_area = function_area + (":" + funcao_label) + 
+                                                                    $6.v + default_return; 
+                                                    $$.v = $2.v + "&" + $2.v + "{}" + "=" + "'&funcao'" + funcao_label + "[=]" + "^"; }
 
 CMD_IF      : IF '(' RVALUE ')' CMD             {   string ifok_label = gera_label("ifok");
                                                     string ifend_label = gera_label("ifend");
@@ -120,27 +141,30 @@ CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD     {   string forex
 LVALUE      : ID                            { trata_uso( $1.v[0] ); $$.v = $1.v; }
             ;
 
-LVALUEPROP  : RVALUE '.' ID                 { $$.v = $1.v + $3.v; }
-            | RVALUE '[' RVALUE ']'         { $$.v = $1.v + $3.v; } 
+LVALUEPROP  : EXPR '.' ID                 { $$.v = $1.v + $3.v; }
+            | EXPR '[' RVALUE ']'         { $$.v = $1.v + $3.v; } 
             ;
 
 RVALUE      : ATRIB                         { $$.v = $1.v; }
-            | RVALUE MEIG RVALUE            { $$.v = $1.v + $3.v + "<="; }
-            | RVALUE MAIG RVALUE            { $$.v = $1.v + $3.v + ">="; }
-            | RVALUE IG RVALUE              { $$.v = $1.v + $3.v + "=="; }
-            | RVALUE DIF RVALUE             { $$.v = $1.v + $3.v + "!="; }
-            | RVALUE '^' RVALUE             { $$.v = $1.v + $3.v + "^"; }
-            | RVALUE '<' RVALUE             { $$.v = $1.v + $3.v + "<"; }
-            | RVALUE '>' RVALUE             { $$.v = $1.v + $3.v + ">"; }
-            | RVALUE '*' RVALUE             { $$.v = $1.v + $3.v + "*"; }
-            | RVALUE '+' RVALUE             { $$.v = $1.v + $3.v + "+"; }
-            | RVALUE '-' RVALUE             { $$.v = $1.v + $3.v + "-"; }
-            | RVALUE '/' RVALUE             { $$.v = $1.v + $3.v + "/"; }
-            | RVALUE '%' RVALUE             { $$.v = $1.v + $3.v + "%"; }
+            | EXPR                          { $$.v = $1.v; }
+            | '{''}'                        { $$.v = {string("{}")}; }
+
+EXPR        : EXPR MEIG EXPR                { $$.v = $1.v + $3.v + "<="; }
+            | EXPR MAIG EXPR                { $$.v = $1.v + $3.v + ">="; }
+            | EXPR IG EXPR                  { $$.v = $1.v + $3.v + "=="; }
+            | EXPR DIF EXPR                 { $$.v = $1.v + $3.v + "!="; }
+            | EXPR '^' EXPR                 { $$.v = $1.v + $3.v + "^"; }
+            | EXPR '<' EXPR                 { $$.v = $1.v + $3.v + "<"; }
+            | EXPR '>' EXPR                 { $$.v = $1.v + $3.v + ">"; }
+            | EXPR '*' EXPR                 { $$.v = $1.v + $3.v + "*"; }
+            | EXPR '+' EXPR                 { $$.v = $1.v + $3.v + "+"; }
+            | EXPR '-' EXPR                 { $$.v = $1.v + $3.v + "-"; }
+            | EXPR '/' EXPR                 { $$.v = $1.v + $3.v + "/"; }
+            | EXPR '%' EXPR                 { $$.v = $1.v + $3.v + "%"; }
             | LVALUE INCREM                 { $$.v = $1.v + "@" + $1.v + $1.v + "@" + "1" + "+" + "=" + "^"; }
             | LVALUE DECREM                 { $$.v = $1.v + "@" + $1.v + $1.v + "@" + "1" + "-" + "=" + "^"; }
-            | '+' RVALUE                    { $$.v = $2.v; }
-            | '-' RVALUE                    { $$.v = "0" + $2.v + "-"; }
+            | '+' EXPR                      { $$.v = $2.v; }
+            | '-' EXPR                      { $$.v = "0" + $2.v + "-"; }
             | FINAL                         { $$.v = $1.v; }
             ;
 
@@ -186,15 +210,16 @@ ATRIB       : LVALUE '=' RVALUE                 { trata_atribuicao($1.v[0]); $$.
 
 FINAL       : NUM                           { $$.v = $1.v; }
             | STRING                        { $$.v = $1.v; }
-            | NEWOBJECT                     { $$.v = { string("{}") }; }
             | NEWARRAY                      { $$.v = { string("[]") }; }
             | '(' RVALUE ')'                { $$.v = $2.v; }
             | LVALUE                        { $$.v = $1.v + "@"; }
             | LVALUEPROP                    { $$.v = $1.v + "[@]"; }
+            | ID '('')'                     { $$.v = "0" + $1.v + "@" + "$"; }
             ; 
 
 
-BLOCO       : '{' CMDs '}'                  { $$.v = $2.v; }
+BLOCO       : '{' { abre_escopo(); } CMDs { fecha_escopo(); } '}'           { $$.v = "<{" + $2.v + "}>"; }
+            | '{''}'                                                        { $$.v = {}; }
             ;
   
 %%
@@ -267,17 +292,20 @@ void yyerror( const char* msg ) {
 }
 
 void trata_declaracoes( string id, string tipo ){
+    int i=1;
     for(auto decl = declarations.rbegin(); decl != declarations.rend(); decl++){
         auto decl_type = (*decl).find(id);
         if(decl_type == (*decl).end()){
             continue;
         }else if(tipo == "let"){
-            string linha_decl = to_string(decl_type->second.second);
-            string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
-            yyerror(msg.c_str());
-            return;
+            if(decl == declarations.rbegin()){
+                string linha_decl = to_string(decl_type->second.second);
+                string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
+                yyerror(msg.c_str());
+                return;
+            }
         }else if(tipo == "var"){
-            if(decl_type->second.first != "var"){
+            if(decl_type->second.first != "var" && decl == declarations.rbegin()){
                 string linha_decl = to_string(decl_type->second.second);
                 string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
                 yyerror(msg.c_str());
@@ -292,10 +320,12 @@ void trata_declaracoes( string id, string tipo ){
     }
 
     // O id ainda nao foi declarado
+    // cout << "id " << id << " declarado no escopo " << declarations.size() << endl;
     declarations[declarations.size()-1][id] = {tipo, linha};
 }
 
 void trata_uso( string id ){
+    int i=1;
     for(auto decl = declarations.rbegin(); decl != declarations.rend(); decl++){
         auto decl_type = (*decl).find(id);
         if(decl_type != (*decl).end()){
@@ -309,6 +339,7 @@ void trata_uso( string id ){
 }
 
 void trata_atribuicao( string id ){
+    int i=1;
     for(auto decl = declarations.rbegin(); decl != declarations.rend(); decl++){
         auto decl_type = (*decl).find(id);
         if(decl_type == (*decl).end()){
@@ -326,6 +357,13 @@ void Print( vector<string> st ) {
     vector<string> enderecos_resolvidos = resolve_enderecos(st);
     for( auto x: enderecos_resolvidos )
         cout << x << "\n";
+}
+
+void abre_escopo(){
+    declarations.push_back({});
+}
+void fecha_escopo(){
+    declarations.pop_back();
 }
 
 int main( int argc, char* argv[] ) {
