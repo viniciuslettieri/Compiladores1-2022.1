@@ -1,0 +1,8 @@
+let str = "hello";
+function valor() { return str + ", world"; }
+var a = valor();
+str = "HELLO";;;
+var b = valor
+(
+)
+;

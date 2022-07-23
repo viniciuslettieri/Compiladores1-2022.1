@@ -9,6 +9,3 @@ lex.yy.c: compilador.lex
 
 y.tab.c: compilador.y
 	yacc -v compilador.y
-
-derivada: lex.yy.c y.tab.c
-	g++ -o compilador y.tab.c -lfl

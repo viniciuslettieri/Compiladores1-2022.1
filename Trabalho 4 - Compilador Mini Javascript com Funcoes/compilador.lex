@@ -29,6 +29,11 @@ WS	                    [ \t\n]
 "function"              { return retorna(FUNCTION); }
 "return"                { return retorna(RETURN); }
 
+"asm{".*"}"             { string lexema = trim( yytext + 3, "{}" ); 
+                          yylval.v = tokeniza( lexema, ' ' );
+                          coluna += strlen( yytext ); 
+                          return ASM; }
+
 {ID}	                { return retorna(ID); }
 
 ">="	                { return retorna(MAIG); }  
@@ -39,8 +44,6 @@ WS	                    [ \t\n]
 "-="                    { return retorna(MEATR); }  
 "++"                    { return retorna(INCREM); }
 "--"                    { return retorna(DECREM); }
-
-"[]"                    { return retorna(NEWARRAY); }
 
 {COMENTARIO_BLOCO}      { return retorna(COMENTARIO); }
 {COMENTARIO_LINHA}      { return retorna(COMENTARIO); }

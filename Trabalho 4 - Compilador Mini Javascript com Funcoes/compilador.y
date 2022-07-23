@@ -5,11 +5,13 @@
 #include <map>
 #include <vector>
 #include <unordered_map>
+#include <sstream>
 
 using namespace std;
 
 struct Atributos {
     vector<string> v;
+    int contador = 0;
 };
 
 
@@ -19,10 +21,12 @@ void erro( string msg );
 void Print( vector<string> st );
 int retorna( int tk );
 string nome_token( int token );
+inline string trim( string s, const char* t );
+vector<string> tokeniza( string text, char delim );
 
 string gera_label( string prefixo );
 vector<string> resolve_enderecos( vector<string> entrada );
-void trata_declaracoes( string id, string tipo );
+bool trata_declaracoes( string id, string tipo );
 void trata_uso( string id );
 void trata_atribuicao( string id );
 
@@ -49,7 +53,7 @@ vector<string> function_area;
 
 %}
 
-%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR NEWARRAY FUNCTION RETURN
+%token PRINT ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR FUNCTION RETURN ASM
 
 %right '=' MAATR MEATR 
 %nonassoc '<' '>' IG MEIG MAIG DIF INCREM DECREM
@@ -81,16 +85,37 @@ CMD         : CMD_DECL ';'                  { $$.v = $1.v; }
             | CMD_RETURN                    { $$.v = $1.v; }
             | ';'                           { $$.v = {}; }
             | EXPR ';'                      { $$.v = $1.v + "^"; }
+            | EXPR ASM ';' 	                { $$.v = $1.v + $2.v + "^"; }
             | ATRIB ';'                     { $$.v = $1.v + "^"; }
             | BLOCO                         { $$.v = $1.v; }
             ;
 
-CMD_RETURN  : RETURN RVALUE ';'             { $$.v = $2.v + "'&retorno'" + "@" + "~"; } 
+CMD_RETURN  : RETURN RVALUE ';'                         {   $$.v = $2.v + "'&retorno'" + "@" + "~"; } 
 
-CMD_FUNCTION: FUNCTION ID '(' ')' '{' CMDz '}'  {   string funcao_label = gera_label("funcao" + $2.v[0]); 
-                                                    function_area = function_area + (":" + funcao_label) + 
-                                                                    $6.v + default_return; 
-                                                    $$.v = $2.v + "&" + $2.v + "{}" + "=" + "'&funcao'" + funcao_label + "[=]" + "^"; }
+CMD_FUNCTION: FUNCTION ID '(' { abre_escopo(); } ')' '{' CMDz '}' { fecha_escopo(); }          
+                                                        {   trata_declaracoes($2.v[0], "function");
+                                                            string funcao_label = gera_label("funcao" + $2.v[0]); 
+                                                            function_area = function_area + (":" + funcao_label) + 
+                                                                            $7.v + default_return; 
+                                                            $$.v = $2.v + "&" + $2.v + "{}" + "=" + "'&funcao'" + funcao_label + "[=]" + "^"; }
+            | FUNCTION ID '(' { abre_escopo(); } PARAMS ')' '{'  CMDz '}' { fecha_escopo(); }
+                                                        {   trata_declaracoes($2.v[0], "function");
+                                                            string funcao_label = gera_label("funcao" + $2.v[0]); 
+                                                            function_area = function_area + (":" + funcao_label) + 
+                                                                            $5.v + $8.v + default_return; 
+                                                            $$.v = $2.v + "&" + $2.v + "{}" + "=" + "'&funcao'" + funcao_label + "[=]" + "^"; }
+
+PARAMS      : PARAMS ',' ID                             {   $$.contador = 1 + $1.contador;
+                                                            vector<string> decl = {$3.v[0], "&"}; if(!trata_declaracoes($3.v[0], "var")) decl = {};
+                                                            $$.v = $1.v + decl + $3.v + "arguments" + "@" + 
+                                                                   to_string($$.contador) + "[@]" + "=" + "^"; 
+                                                        }
+            | ID                                        {   $$.contador = 0;
+                                                            vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "var")) decl = {}; 
+                                                            $$.v = decl + $1.v + "arguments" + "@" + 
+                                                                   to_string($$.contador) + "[@]" + "=" + "^"; 
+                                                        }
+            ;
 
 CMD_IF      : IF '(' RVALUE ')' CMD             {   string ifok_label = gera_label("ifok");
                                                     string ifend_label = gera_label("ifend");
@@ -138,7 +163,7 @@ CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD     {   string forex
                                                                            (":" + forend_label);   }
             ;
 
-LVALUE      : ID                            { trata_uso( $1.v[0] ); $$.v = $1.v; }
+LVALUE      : ID                          { trata_uso( $1.v[0] ); $$.v = $1.v; }
             ;
 
 LVALUEPROP  : EXPR '.' ID                 { $$.v = $1.v + $3.v; }
@@ -166,6 +191,8 @@ EXPR        : EXPR MEIG EXPR                { $$.v = $1.v + $3.v + "<="; }
             | '+' EXPR                      { $$.v = $2.v; }
             | '-' EXPR                      { $$.v = "0" + $2.v + "-"; }
             | FINAL                         { $$.v = $1.v; }
+            | FINAL '('')'                  { $$.v = "0" + $1.v + "$"; }
+            | FINAL '(' ARGS ')'            { $$.v = $3.v + to_string($3.contador) + $1.v + "$"; }
             ;
 
 CMD_DECL    : CMD_LET                           { $$.v = $1.v; }
@@ -176,28 +203,28 @@ CMD_DECL    : CMD_LET                           { $$.v = $1.v; }
 CMD_LET     : LET MULTI_LET                     { $$.v = $2.v; }
             ;
 
-MULTI_LET   : ID '=' RVALUE ',' MULTI_LET       { trata_declaracoes($1.v[0], "let"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
-            | ID '=' RVALUE                     { trata_declaracoes($1.v[0], "let"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
-            | ID ',' MULTI_LET                  { trata_declaracoes($1.v[0], "let"); $$.v = $1.v + "&" + $3.v; }
-            | ID                                { trata_declaracoes($1.v[0], "let"); $$.v = $1.v + "&"; }
+MULTI_LET   : ID '=' RVALUE ',' MULTI_LET       { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "let")) decl = {}; $$.v = decl + $1.v + $3.v + "=" + "^" + $5.v; }
+            | ID '=' RVALUE                     { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "let")) decl = {}; $$.v = decl + $1.v + $3.v + "=" + "^"; }
+            | ID ',' MULTI_LET                  { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "let")) decl = {}; $$.v = decl + $3.v; }
+            | ID                                { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "let")) decl = {}; $$.v = decl; }
             ;
 
 CMD_VAR     : VAR MULTI_VAR                     { $$.v = $2.v; }
             ;
 
-MULTI_VAR   : ID '=' RVALUE ',' MULTI_VAR       { trata_declaracoes($1.v[0], "var"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
-            | ID '=' RVALUE                     { trata_declaracoes($1.v[0], "var"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
-            | ID ',' MULTI_VAR                  { trata_declaracoes($1.v[0], "var"); $$.v = $1.v + "&" + $3.v; }
-            | ID                                { trata_declaracoes($1.v[0], "var"); $$.v = $1.v + "&"; }
+MULTI_VAR   : ID '=' RVALUE ',' MULTI_VAR       { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "var")) decl = {}; $$.v = decl + $1.v + $3.v + "=" + "^" + $5.v; }
+            | ID '=' RVALUE                     { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "var")) decl = {}; $$.v = decl + $1.v + $3.v + "=" + "^"; }
+            | ID ',' MULTI_VAR                  { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "var")) decl = {}; $$.v = decl + $3.v; }
+            | ID                                { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "var")) decl = {}; $$.v = decl; }
             ;
 
 CMD_CONST   : CONST MULTI_CONST                 { $$.v = $2.v; }
             ;
 
-MULTI_CONST : ID '=' RVALUE ',' MULTI_CONST     { trata_declaracoes($1.v[0], "const"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^" + $5.v; }
-            | ID '=' RVALUE                     { trata_declaracoes($1.v[0], "const"); $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
-            | ID ',' MULTI_CONST                { trata_declaracoes($1.v[0], "const"); $$.v = $1.v + "&" + $3.v; }
-            | ID                                { trata_declaracoes($1.v[0], "const"); $$.v = $1.v + "&"; }
+MULTI_CONST : ID '=' RVALUE ',' MULTI_CONST     { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "const")) decl = {}; $$.v = decl + $1.v + $3.v + "=" + "^" + $5.v; }
+            | ID '=' RVALUE                     { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "const")) decl = {}; $$.v = decl + $1.v + $3.v + "=" + "^"; }
+            | ID ',' MULTI_CONST                { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "const")) decl = {}; $$.v = decl + $3.v; }
+            | ID                                { vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "const")) decl = {}; $$.v = decl; }
             ;
 
 ATRIB       : LVALUE '=' RVALUE                 { trata_atribuicao($1.v[0]); $$.v = $1.v + $3.v + "="; }
@@ -210,15 +237,18 @@ ATRIB       : LVALUE '=' RVALUE                 { trata_atribuicao($1.v[0]); $$.
 
 FINAL       : NUM                           { $$.v = $1.v; }
             | STRING                        { $$.v = $1.v; }
-            | NEWARRAY                      { $$.v = { string("[]") }; }
+            | '['']'                        { $$.v = { string("[]") }; }
             | '(' RVALUE ')'                { $$.v = $2.v; }
             | LVALUE                        { $$.v = $1.v + "@"; }
             | LVALUEPROP                    { $$.v = $1.v + "[@]"; }
-            | ID '('')'                     { $$.v = "0" + $1.v + "@" + "$"; }
             ; 
 
+ARGS        : RVALUE ',' ARGS                           {   $$.v = $1.v + $3.v;
+                                                            $$.contador = 1 + $3.contador;  }
+            | RVALUE                                    {   $$.v = $1.v;
+                                                            $$.contador = 1;   }
 
-BLOCO       : '{' { abre_escopo(); } CMDs { fecha_escopo(); } '}'           { $$.v = "<{" + $2.v + "}>"; }
+BLOCO       : '{' { abre_escopo(); } CMDs { fecha_escopo(); } '}'           { $$.v = "<{" + $3.v + "}>"; }
             | '{''}'                                                        { $$.v = {}; }
             ;
   
@@ -252,6 +282,23 @@ int retorna( int tk ) {
 string gera_label( string prefixo ) {
     static int n_label = 0;
     return prefixo + "_" + to_string( ++n_label ) + ":";
+}
+
+inline string trim( string s, const char* t = " \t\n\r\f\v" ) {
+    s.erase(0, s.find_first_not_of(t));
+    s.erase(s.find_last_not_of(t) + 1);
+    return s;
+}
+
+// https://stackoverflow.com/a/65075284
+vector<string> tokeniza( string text, char delim ) {
+    string line;
+    vector<string> vec;
+    stringstream ss(text);
+    while(getline(ss, line, delim)) {
+        vec.push_back(line);
+    }
+    return vec;
 }
 
 vector<string> resolve_enderecos( vector<string> entrada ) {
@@ -291,7 +338,7 @@ void yyerror( const char* msg ) {
     exit(1);
 }
 
-void trata_declaracoes( string id, string tipo ){
+bool trata_declaracoes( string id, string tipo ){
     int i=1;
     for(auto decl = declarations.rbegin(); decl != declarations.rend(); decl++){
         auto decl_type = (*decl).find(id);
@@ -302,26 +349,32 @@ void trata_declaracoes( string id, string tipo ){
                 string linha_decl = to_string(decl_type->second.second);
                 string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
                 yyerror(msg.c_str());
-                return;
+                return false;
             }
         }else if(tipo == "var"){
+            if(decl_type->second.first == "var" && decl == declarations.rbegin()){
+                return false;
+            }
             if(decl_type->second.first != "var" && decl == declarations.rbegin()){
                 string linha_decl = to_string(decl_type->second.second);
                 string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
                 yyerror(msg.c_str());
+                return false;
             }
-            return;
         }else if(tipo == "const"){
-            string linha_decl = to_string(decl_type->second.second);
-            string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
-            yyerror(msg.c_str());
-            return;
+            if(decl == declarations.rbegin()){
+                string linha_decl = to_string(decl_type->second.second);
+                string msg = "Erro: a variável '" + id + "' já foi declarada na linha " + linha_decl + ".";
+                yyerror(msg.c_str());
+                return false;
+            }
         }
     }
 
     // O id ainda nao foi declarado
     // cout << "id " << id << " declarado no escopo " << declarations.size() << endl;
     declarations[declarations.size()-1][id] = {tipo, linha};
+    return true;
 }
 
 void trata_uso( string id ){
