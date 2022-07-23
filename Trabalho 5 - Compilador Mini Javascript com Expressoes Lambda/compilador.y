@@ -104,6 +104,7 @@ CMD_FUNCTION: FUNCTION ID '(' { trata_declaracoes($2.v[0], "function"); abre_esc
                                                             function_area = function_area + (":" + funcao_label) + 
                                                                             $5.v + $8.v + default_return; 
                                                             $$.v = $2.v + "&" + $2.v + "{}" + "=" + "'&funcao'" + funcao_label + "[=]" + "^"; }
+            ;
 
 PARAMS      : PARAMS ',' ID                             {   $$.contador = 1 + $1.contador;
                                                             vector<string> decl = {$3.v[0], "&"}; if(!trata_declaracoes($3.v[0], "var")) decl = {};
@@ -174,9 +175,35 @@ RVALUE      : ATRIB                         { $$.v = $1.v; }
             | EXPR                          { $$.v = $1.v; }
             | '{''}'                        { $$.v = {string("{}")}; }
             | '{' LIT_DECLS '}'             { $$.v = string("{}") + $2.v; }
+            | '['']'                        { $$.v = { string("[]") }; }
+            | '[' ARRAY_DECLS ']'           { $$.v = string("[]") + $2.v; }
+            | ANONYMOUS_FUNCTION            { $$.v = $1.v; }
+            ;
 
 LIT_DECLS   : ID ':' RVALUE ',' LIT_DECLS   { $$.v = $1.v + $3.v + "[<=]" + $5.v; }
             | ID ':' RVALUE                 { $$.v = $1.v + $3.v + "[<=]"; }
+            ;
+
+ARRAY_DECLS : ARRAY_DECLS ',' RVALUE        {   $$.contador = 1 + $1.contador;    
+                                                $$.v = $1.v + to_string($$.contador) + $3.v + "[<=]"; }
+            | RVALUE                        {   $$.contador = 0;
+                                                $$.v = to_string($$.contador) + $1.v + "[<=]"; }
+            ;
+
+ANONYMOUS_FUNCTION: 
+            FUNCTION '(' { abre_escopo();  } ')' '{' CMDz '}' { fecha_escopo(); }          
+                                                        {   
+                                                            string funcao_label = gera_label("funcao_anonima"); 
+                                                            function_area = function_area + (":" + funcao_label) + 
+                                                                            $6.v + default_return; 
+                                                            $$.v = vector<string>{"{}"} + "'&funcao'" + funcao_label + "[<=]"; }
+            | FUNCTION '(' { abre_escopo(); } PARAMS ')' '{'  CMDz '}' { fecha_escopo(); }
+                                                        {   
+                                                            string funcao_label = gera_label("funcao_anonima"); 
+                                                            function_area = function_area + (":" + funcao_label) + 
+                                                                            $4.v + $7.v + default_return; 
+                                                            $$.v = vector<string>{"{}"} + "'&funcao'" + funcao_label + "[<=]"; }
+            ;
 
 EXPR        : EXPR MEIG EXPR                { $$.v = $1.v + $3.v + "<="; }
             | EXPR MAIG EXPR                { $$.v = $1.v + $3.v + ">="; }
@@ -241,7 +268,6 @@ ATRIB       : LVALUE '=' RVALUE                 { trata_atribuicao($1.v[0]); $$.
 
 FINAL       : NUM                           { $$.v = $1.v; }
             | STRING                        { $$.v = $1.v; }
-            | '['']'                        { $$.v = { string("[]") }; }
             | '(' RVALUE ')'                { $$.v = $2.v; }
             | LVALUE                        { $$.v = $1.v + "@"; }
             | LVALUEPROP                    { $$.v = $1.v + "[@]"; }
@@ -253,6 +279,7 @@ ARGS        : RVALUE ',' ARGS                           {   $$.v = $1.v + $3.v;
                                                             $$.contador = 1 + $3.contador;  }
             | RVALUE                                    {   $$.v = $1.v;
                                                             $$.contador = 1;   }
+            ;
 
 BLOCO       : '{' { abre_escopo(); } CMDs { fecha_escopo(); } '}'           { $$.v = "<{" + $3.v + "}>"; }
             | '{''}'                                                        { $$.v = {}; }
