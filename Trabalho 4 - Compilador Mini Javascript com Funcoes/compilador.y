@@ -163,7 +163,7 @@ CMD_FOR     : FOR '(' CMD_DECL ';' RVALUE ';' ATRIB ')' CMD     {   string forex
                                                                            (":" + forend_label);   }
             ;
 
-LVALUE      : ID                          { trata_uso( $1.v[0] ); $$.v = $1.v; }
+LVALUE      : ID                          { /*trata_uso( $1.v[0] );*/ $$.v = $1.v; }
             ;
 
 LVALUEPROP  : EXPR '.' ID                 { $$.v = $1.v + $3.v; }

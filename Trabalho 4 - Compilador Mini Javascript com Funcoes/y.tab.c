@@ -1780,7 +1780,7 @@ yyreduce:
 
   case 32:
 #line 166 "compilador.y"
-                                          { trata_uso( yyvsp[0].v[0] ); yyval.v = yyvsp[0].v; }
+                                          { /*trata_uso( $1.v[0] );*/ yyval.v = yyvsp[0].v; }
 #line 1785 "y.tab.c"
     break;
 
