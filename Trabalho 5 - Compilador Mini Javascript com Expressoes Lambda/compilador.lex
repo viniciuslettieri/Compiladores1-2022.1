@@ -8,13 +8,16 @@ COMENTARIO_LINHA        \/\/[^(\n)]*
 STRING_SIMPLES          \'([^\'\n\\]|(\\\')|\'\'|'\\\\')+\'
 STRING_DUPLA            \"([^\"\n\\]|(\\\")|\"\"|"\\\\")+\"
 STRING_ACENTO           `[^`]*`
-WS	                    [ \t\n]
+WS	                    [ \t\n]*
+ARGS                    {WS}{ID}{WS}(","{WS}{ID}{WS})*
 
 %%
 
 "\t"                    { coluna += 4; }
 " "                     { coluna++; }
 "\n"	                { linha++; coluna = 1;  }
+
+"("/{ARGS}")"{WS}"=>"   { return retorna(ABRE_PAR_SETA); }
 
 {NUM}	                { return retorna(NUM); }
 
@@ -35,6 +38,7 @@ WS	                    [ \t\n]
                           yylval.v = tokeniza( lexema, ' ' );
                           coluna += strlen( yytext ); 
                           return ASM; }
+"=>"                    { return retorna(SETA); }
 
 {ID}	                { return retorna(ID); }
 

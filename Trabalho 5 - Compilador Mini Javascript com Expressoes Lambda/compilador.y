@@ -53,7 +53,7 @@ vector<string> function_area;
 
 %}
 
-%token ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR FUNCTION RETURN ASM TRUE FALSE
+%token ID NUM MAIG MEIG IG DIF MAATR MEATR INCREM DECREM STRING COMENTARIO LET CONST VAR IF ELSE WHILE FOR FUNCTION RETURN ASM TRUE FALSE SETA ABRE_PAR_SETA
 
 %right '=' MAATR MEATR 
 %nonassoc '<' '>' IG MEIG MAIG DIF INCREM DECREM
@@ -178,6 +178,7 @@ RVALUE      : ATRIB                         { $$.v = $1.v; }
             | '['']'                        { $$.v = { string("[]") }; }
             | '[' ARRAY_DECLS ']'           { $$.v = string("[]") + $2.v; }
             | ANONYMOUS_FUNCTION            { $$.v = $1.v; }
+            | ARROW_FUNCTION                { $$.v = $1.v; }
             ;
 
 LIT_DECLS   : ID ':' RVALUE ',' LIT_DECLS   { $$.v = $1.v + $3.v + "[<=]" + $5.v; }
@@ -204,6 +205,27 @@ ANONYMOUS_FUNCTION:
                                                                             $4.v + $7.v + default_return; 
                                                             $$.v = vector<string>{"{}"} + "'&funcao'" + funcao_label + "[<=]"; }
             ;
+
+ARROW_FUNCTION: ARROW_PARAMS SETA EXPR
+                                                        {   
+                                                            string funcao_label = gera_label("funcao_arrow"); 
+                                                            function_area = function_area + (":" + funcao_label) + 
+                                                                            $1.v + $3.v + "'&retorno'" + "@" + "~";
+                                                            $$.v = vector<string>{"{}"} + "'&funcao'" + funcao_label + "[<=]"; 
+                                                            fecha_escopo();
+                                                        }
+            ;
+
+ARROW_PARAMS: ID                                        {   $$.contador = 0;
+                                                            abre_escopo();
+                                                            vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "var")) decl = {}; 
+                                                            $$.v = decl + $1.v + "arguments" + "@" + 
+                                                                    to_string($$.contador) + "[@]" + "=" + "^"; 
+                                                        }
+            | ABRE_PAR_SETA {abre_escopo();} PARAMS ')' { $$.v = $3.v; }
+            | '(' ')'                                   { $$.v = {}; }
+            ;
+            
 
 EXPR        : EXPR MEIG EXPR                { $$.v = $1.v + $3.v + "<="; }
             | EXPR MAIG EXPR                { $$.v = $1.v + $3.v + ">="; }
@@ -306,6 +328,7 @@ string nome_token( int token ) {
 }
 
 int retorna( int tk ) {  
+    // cout << yytext << tk << endl;
     yylval.v = {yytext}; 
     coluna += strlen( yytext ); 
     return tk;

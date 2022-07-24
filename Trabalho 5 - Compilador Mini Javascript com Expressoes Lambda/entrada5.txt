@@ -1,0 +1,7 @@
+let dobro = x => 2*x;
+let dobro2 = (x) => (2*x);
+let soma = (x,y) => (x+y);
+
+let k1 = dobro(3);
+let k2 = dobro2(3);
+let k3 = soma(1,3);
