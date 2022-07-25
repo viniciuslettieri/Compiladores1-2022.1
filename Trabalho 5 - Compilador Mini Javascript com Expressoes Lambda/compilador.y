@@ -116,6 +116,33 @@ PARAMS      : PARAMS ',' ID                             {   $$.contador = 1 + $1
                                                             $$.v = decl + $1.v + "arguments" + "@" + 
                                                                    to_string($$.contador) + "[@]" + "=" + "^"; 
                                                         }
+            | PARAMS ',' ID '=' RVALUE                  {   $$.contador = 1 + $1.contador;
+                                                            vector<string> decl = {$3.v[0], "&"}; if(!trata_declaracoes($3.v[0], "var")) decl = {};
+                                                            string ifok_label = gera_label("ifok");
+                                                            string ifend_label = gera_label("ifend");
+                                                            $$.v = $1.v + decl + $3.v + "arguments" + "@" + 
+                                                                   to_string($$.contador) + "[@]" + "=" +
+                                                                   "undefined" + "@" + "==" + 
+                                                                   (ifok_label) + "?" + 
+                                                                   (ifend_label) + "#" + 
+                                                                   (":" + ifok_label) + 
+                                                                   $3.v + $5.v + "=" + "^" + 
+                                                                   (":" + ifend_label);
+                                                        }
+            | ID '=' RVALUE                             {   $$.contador = 0;
+                                                            vector<string> decl = {$1.v[0], "&"}; if(!trata_declaracoes($1.v[0], "var")) decl = {}; 
+                                                            string ifok_label = gera_label("ifok");
+                                                            string ifend_label = gera_label("ifend");
+                                                            $$.v = $3.v + 
+                                                            $$.v = decl + $1.v + "arguments" + "@" + 
+                                                                   to_string($$.contador) + "[@]" + "=" +
+                                                                   "undefined" + "@" + "==" + 
+                                                                   (ifok_label) + "?" + 
+                                                                   (ifend_label) + "#" + 
+                                                                   (":" + ifok_label) + 
+                                                                   $1.v + $3.v + "=" + "^" + 
+                                                                   (":" + ifend_label);
+                                                        }
             ;
 
 CMD_IF      : IF '(' RVALUE ')' CMD             {   string ifok_label = gera_label("ifok");
